@@ -1,5 +1,5 @@
-use crate::builtins::Dims;
-use crate::builtins::{Position, Size};
+use crate::position::Dims;
+use crate::position::{Position, Size};
 
 pub const EMPTY_CHAR: char = ' ';
 
@@ -45,7 +45,7 @@ impl Sprite {
     pub fn new(sx: usize, sy: usize) -> Self {
         Self {
             buf: vec![EMPTY_CHAR; sx * sy].into_boxed_slice(),
-            size: Size::new(sx, sy),
+            size: Size::new(sx as u64, sy as u64),
         }
     }
 
@@ -54,7 +54,7 @@ impl Sprite {
     }
 
     pub fn fill(&mut self, chr: char) {
-        self.buf = vec![chr; self.size.flat()].into_boxed_slice();
+        self.buf = vec![chr; self.size.flat() as usize].into_boxed_slice();
     }
 
     pub fn draw(&mut self, chr: char, pos: Position) {
@@ -63,10 +63,10 @@ impl Sprite {
 
     pub fn draw_sprite(&mut self, sprite: &Sprite, pos: &Position) {
         for (i, chr) in sprite.buf.iter().enumerate() {
-            let local_pos = Position::from_flat(i as u64, sprite.size());
+            let local_pos = Position::from_flat(i as i64, sprite.size());
             let target_pos = Position::new(local_pos.x() + pos.x(), local_pos.y() + pos.y());
-            if (target_pos.x() as usize) < self.size.w()
-                && (target_pos.y() as usize) < self.size.h()
+            if (target_pos.x() as usize) < self.size.w() as usize
+                && (target_pos.y() as usize) < self.size.h() as usize
             {
                 self.draw(*chr, target_pos);
             }
