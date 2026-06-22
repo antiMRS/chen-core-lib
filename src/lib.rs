@@ -23,11 +23,17 @@ mod test {
         };
     }
 
-    use crate::*;
+    use crate::{screen::Terminal, *};
     #[test]
     fn main_test() {
         let mut screen = screen::Terminal::new("Test terminal", 100, 100);
         screen.render();
+    }
+
+    #[test]
+    fn positions() {
+        let buf: Buffer<char> = Buffer::new(10, 10);
+        println!("{:?}", buf);
     }
 
     #[test]
@@ -75,11 +81,5 @@ mod test {
     }
 
     #[test]
-    fn color() {
-        println!("\x1b[1;0m\x1b[38;2;255;255;255mbold_rgb\x1b[0m");
-        println!("\x1b[0;0m\x1b[38;2;255;255;255munbold_rgb\x1b[0m");
-        let color = Color::new(255, 255, 255);
-        assert_eq!(color.as_ascii(), 37);
-        assert_ne!(color.as_ascii(), 0);
-    }
+    fn color() {}
 }

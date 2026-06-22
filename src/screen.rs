@@ -54,7 +54,7 @@ impl Terminal {
             for y in 0..h {
                 for x in 0..w {
                     let pos = Position::new(x as i64, y as i64);
-                    let ch = self.buf.get(&pos);
+                    let ch = self.buf.get_char(&pos);
                     let _ = write!(stdout, "{}", ch);
                 }
                 let _ = writeln!(stdout);

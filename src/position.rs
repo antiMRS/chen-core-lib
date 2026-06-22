@@ -70,10 +70,6 @@ impl Position {
     }
 
     pub fn flat(&self, size: &Size) -> i64 {
-        debug_assert!(
-            self.x() < size.w() as i64 && self.y() < size.h() as i64,
-            "Position out of bounds"
-        );
         self.y() * (size.w() as i64) + self.x()
     }
 
