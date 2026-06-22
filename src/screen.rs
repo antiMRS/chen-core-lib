@@ -1,8 +1,5 @@
 // terminal.rs
-use crate::builtins::{Position, Size};
-#[cfg(feature = "colored")]
-use crate::render::Color;
-use crate::render::{EMPTY_CHAR, Sprite};
+use crate::builtins::{EMPTY_CHAR, Position, Size, Sprite};
 
 use std::io::{self, Write};
 use std::process::Command;

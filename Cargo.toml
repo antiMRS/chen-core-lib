@@ -2,7 +2,8 @@
 name = "RubyCoreLib"
 version = "0.0.1"
 edition = "2024"
-description = ""
+description = "Assets for terminal games."
+repositiory = "https://github.com/antiMRS/RubyCore"
 authors = ["antiMRS"]
 
 [dependencies]
