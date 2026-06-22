@@ -1,8 +1,12 @@
+use std::fmt::Debug;
+
 use crate::position::Dims;
 use crate::position::{Position, Size};
 
 pub const EMPTY_CHAR: char = ' ';
 
+#[derive(Clone)]
+#[repr(transparent)]
 pub struct Buffer<T: Default + Copy> {
     buf: Box<[T]>,
 }
@@ -28,7 +32,7 @@ impl<T: Default + Copy> Buffer<T> {
         self.buf = vec![what; total].into_boxed_slice();
     }
 
-    pub fn draw(&mut self, size: &Size, other: Buffer<T>, other_size: &Size, pos: &Position) {
+    pub fn draw(&mut self, size: &Size, other: &Buffer<T>, other_size: &Size, pos: &Position) {
         let w = size.w() as i64;
         let h = size.h() as i64;
 
@@ -45,6 +49,12 @@ impl<T: Default + Copy> Buffer<T> {
 
             self.buf[target_idx] = other.buf[src_idx];
         }
+    }
+}
+
+impl<T: Debug + Default + Copy> Debug for Buffer<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self.buf)
     }
 }
 
@@ -79,7 +89,7 @@ impl Clone for UDim {
 }
 
 #[cfg(feature = "colored")]
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct Color {
     rgb: Dims<u8, 3>,
 }
@@ -148,26 +158,26 @@ impl CharStyle {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Sprite {
-    buf: Box<[char]>,
+    chars: Buffer<char>,
     size: Size,
     #[cfg(feature = "colored")]
-    colors: Box<[Color]>,
+    colors: Buffer<Color>,
     #[cfg(feature = "styled")]
-    styles: Box<[CharStyle]>,
+    styles: Buffer<CharStyle>,
 }
 
 impl Sprite {
     pub fn new(sx: usize, sy: usize) -> Self {
         let total = sx * sy;
         Self {
-            buf: vec![EMPTY_CHAR; total].into_boxed_slice(),
+            chars: Buffer::new(sx, sy),
             size: Size::new(sx as u64, sy as u64),
             #[cfg(feature = "colored")]
-            colors: vec![Color::default(); total].into_boxed_slice(),
+            colors: Buffer::new(sx, sy),
             #[cfg(feature = "styled")]
-            styles: vec![CharStyle::default(); total].into_boxed_slice(),
+            styles: Buffer::new(sx, sy),
         }
     }
 
@@ -176,76 +186,39 @@ impl Sprite {
     }
 
     pub fn fill(&mut self, chr: char) {
-        let total = self.size.flat() as usize;
-        self.buf = vec![chr; total].into_boxed_slice();
+        self.chars.fill(&self.size, chr);
     }
 
     #[cfg(feature = "colored")]
     pub fn fill_color(&mut self, color: Color) {
-        let total = self.size.flat() as usize;
-        self.colors = vec![color; total].into_boxed_slice();
+        self.colors.fill(&self.size, color);
     }
 
-    pub fn draw(&mut self, chr: char, pos: Position) {
-        let idx = pos.flat(&self.size) as usize;
-        self.buf[idx] = chr;
+    pub fn draw(&mut self, chr: char, pos: &Position) {
+        self.chars.set(&self.size, pos, chr)
     }
 
     #[cfg(feature = "colored")]
-    pub fn draw_colored(&mut self, chr: char, pos: Position, color: Color) {
-        let idx = pos.flat(&self.size) as usize;
-        self.buf[idx] = chr;
-        self.colors[idx] = color;
+    pub fn draw_colored(&mut self, chr: char, pos: &Position, color: Color) {
+        self.chars.set(&self.size, pos, chr);
+        self.colors.set(&self.size, pos, color);
     }
 
     pub fn draw_sprite(&mut self, sprite: &Sprite, pos: &Position) {
-        let w = self.size.w() as i64;
-        let h = self.size.h() as i64;
-
-        for i in 0..sprite.buf.len() {
-            let local_pos = Position::from_flat(i as i64, sprite.size());
-            let target_x = local_pos.x() + pos.x();
-            let target_y = local_pos.y() + pos.y();
-            if target_x < 0 || target_y < 0 || target_x >= w || target_y >= h {
-                continue;
-            }
-            let target_pos = Position::new(target_x, target_y);
-            let target_idx = target_pos.flat(&self.size) as usize;
-            let src_idx = i;
-
-            self.buf[target_idx] = sprite.buf[src_idx];
-
-            #[cfg(feature = "colored")]
-            {
-                self.colors[target_idx] = sprite.colors[src_idx];
-            }
-        }
+        self.chars
+            .draw(&self.size, &sprite.chars, &sprite.size, pos);
     }
 
-    pub fn get(&self, pos: &Position) -> char {
-        self.buf[pos.flat(&self.size) as usize]
+    pub fn get_char(&self, pos: &Position) -> char {
+        self.chars.get(&self.size, pos)
     }
 
     #[cfg(feature = "colored")]
     pub fn get_color(&self, pos: &Position) -> Color {
-        self.colors[pos.flat(&self.size) as usize]
+        self.colors.get(&self.size, pos)
     }
-
+    #[cfg(feature = "styled")]
     pub fn get_style(&self, pos: &Position) -> CharStyle {
-        self.styles[pos.flat(&self.size) as usize]
-    }
-}
-
-impl Clone for Sprite {
-    fn clone(&self) -> Self {
-        let total = self.size.flat() as usize;
-        Self {
-            buf: self.buf.clone(),
-            size: self.size.clone(),
-            #[cfg(feature = "colored")]
-            colors: self.colors.clone(),
-            #[cfg(feature = "styled")]
-            styles: self.styles.clone(),
-        }
+        self.styles.get(&self.size, pos)
     }
 }

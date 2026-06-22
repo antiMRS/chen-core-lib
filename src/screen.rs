@@ -70,7 +70,7 @@ impl Terminal {
                     use crate::render::CharStyle;
 
                     let pos = Position::new(x as i64, y as i64);
-                    let ch = self.buf.get(&pos);
+                    let ch = self.buf.get_char(&pos);
                     let color = self.buf.get_color(&pos);
                     #[cfg(feature = "styled")]
                     let style = self.buf.get_style(&pos);
