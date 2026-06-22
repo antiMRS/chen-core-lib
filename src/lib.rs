@@ -27,6 +27,7 @@ mod test {
     #[test]
     fn main_test() {
         let mut screen = screen::Terminal::new("Test terminal", 100, 100);
+        screen.render();
     }
 
     #[test]
@@ -71,5 +72,12 @@ mod test {
         assert!(geom.collide(&geom_pos, &Geometry::new_square(3), &pos!(4, 6)));
         assert!(geom.collide(&geom_pos, &geom, &pos!(3, 6)));
         assert!(geom.collide(&geom_pos, &Geometry::new_square(1), &pos!(8, 9)));
+    }
+
+    #[test]
+    fn color() {
+        let color = Color::new(255, 255, 255);
+        assert_eq!(color.as_ascii(), 37);
+        assert_ne!(color.as_ascii(), 0);
     }
 }

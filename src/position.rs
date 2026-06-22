@@ -1,6 +1,6 @@
 use std::ops::{Index, IndexMut};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub(super) struct Dims<T: Copy, const D: usize> {
     dims: [T; D],
 }

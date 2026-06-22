@@ -8,5 +8,5 @@ authors = ["antiMRS"]
 [dependencies]
 
 [features]
-default = []
+default = ["colored"]
 colored = []
