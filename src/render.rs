@@ -207,6 +207,12 @@ impl Sprite {
     pub fn draw_sprite(&mut self, sprite: &Sprite, pos: &Position) {
         self.chars
             .draw(&self.size, &sprite.chars, &sprite.size, pos);
+        #[cfg(feature = "colored")]
+        self.colors
+            .draw(&self.size, &sprite.colors, &sprite.size, pos);
+        #[cfg(feature = "styled")]
+        self.styles
+            .draw(&self.size, &sprite.styles, &sprite.size, pos);
     }
 
     pub fn get_char(&self, pos: &Position) -> char {
