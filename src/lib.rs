@@ -1,4 +1,6 @@
 mod event;
+#[cfg(windows)]
+mod gui_screen;
 mod position;
 mod render;
 mod screen;
@@ -10,6 +12,7 @@ pub mod builtins {
 
 pub mod system {
     pub use crate::event::*;
+    pub use crate::gui_screen::GuiTerminal;
     pub use crate::screen::Terminal;
 }
 
