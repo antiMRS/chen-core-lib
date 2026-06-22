@@ -194,13 +194,11 @@ impl Clone for UDim {
     }
 }
 
-#[cfg(feature = "colored")]
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct Color {
     rgb: Dims<u8, 3>,
 }
 
-#[cfg(feature = "colored")]
 impl Color {
     pub fn new(r: u8, g: u8, b: u8) -> Self {
         Self {
