@@ -3,6 +3,51 @@ use crate::position::{Position, Size};
 
 pub const EMPTY_CHAR: char = ' ';
 
+pub struct Buffer<T: Default + Copy> {
+    buf: Box<[T]>,
+}
+
+impl<T: Default + Copy> Buffer<T> {
+    pub fn new(w: usize, h: usize) -> Self {
+        Self {
+            buf: vec![T::default(); w * h].into_boxed_slice(),
+        }
+    }
+
+    pub fn get(&self, size: &Size, pos: &Position) -> T {
+        self.buf[pos.flat(size) as usize]
+    }
+
+    pub fn set(&mut self, size: &Size, pos: &Position, what: T) {
+        let idx = pos.flat(size) as usize;
+        self.buf[idx] = what;
+    }
+
+    pub fn fill(&mut self, size: &Size, what: T) {
+        let total = size.flat() as usize;
+        self.buf = vec![what; total].into_boxed_slice();
+    }
+
+    pub fn draw(&mut self, size: &Size, other: Buffer<T>, other_size: &Size, pos: &Position) {
+        let w = size.w() as i64;
+        let h = size.h() as i64;
+
+        for i in 0..other.buf.len() {
+            let local_pos = Position::from_flat(i as i64, other_size);
+            let target_x = local_pos.x() + pos.x();
+            let target_y = local_pos.y() + pos.y();
+            if target_x < 0 || target_y < 0 || target_x >= w || target_y >= h {
+                continue;
+            }
+            let target_pos = Position::new(target_x, target_y);
+            let target_idx = target_pos.flat(size) as usize;
+            let src_idx = i;
+
+            self.buf[target_idx] = other.buf[src_idx];
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct UDim(Dims<f64, 2>);
 
@@ -144,10 +189,6 @@ impl Sprite {
     pub fn draw(&mut self, chr: char, pos: Position) {
         let idx = pos.flat(&self.size) as usize;
         self.buf[idx] = chr;
-        #[cfg(feature = "colored")]
-        {
-            self.colors[idx] = Color::default();
-        }
     }
 
     #[cfg(feature = "colored")]
@@ -160,8 +201,6 @@ impl Sprite {
     pub fn draw_sprite(&mut self, sprite: &Sprite, pos: &Position) {
         let w = self.size.w() as i64;
         let h = self.size.h() as i64;
-        let sw = sprite.size().w() as i64;
-        let sh = sprite.size().h() as i64;
 
         for i in 0..sprite.buf.len() {
             let local_pos = Position::from_flat(i as i64, sprite.size());
