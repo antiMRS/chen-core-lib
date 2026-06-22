@@ -8,7 +8,7 @@ authors = ["antiMRS"]
 [dependencies]
 
 [features]
-default = ["colored", "styled", "terminal_color_legacy"]
+default = ["colored", "terminal_color_rgb"]
 colored = []
 styled = []
 terminal_color_cubes = []
