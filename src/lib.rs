@@ -76,6 +76,8 @@ mod test {
 
     #[test]
     fn color() {
+        println!("\x1b[1;0m\x1b[38;2;255;255;255mbold_rgb\x1b[0m");
+        println!("\x1b[0;0m\x1b[38;2;255;255;255munbold_rgb\x1b[0m");
         let color = Color::new(255, 255, 255);
         assert_eq!(color.as_ascii(), 37);
         assert_ne!(color.as_ascii(), 0);

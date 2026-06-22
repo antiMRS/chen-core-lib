@@ -65,11 +65,39 @@ impl Terminal {
         {
             for y in 0..h {
                 for x in 0..w {
+                    #[cfg(feature = "styled")]
+                    #[cfg(feature = "terminal_color_legacy")]
+                    use crate::render::CharStyle;
+
                     let pos = Position::new(x as i64, y as i64);
                     let ch = self.buf.get(&pos);
                     let color = self.buf.get_color(&pos);
-                    //println!("{}", color.as_ascii());
-                    let _ = write!(stdout, "\x1b[0;{}m{}\x1b[0m", color.as_ascii(), ch);
+                    #[cfg(feature = "styled")]
+                    let style = self.buf.get_style(&pos);
+
+                    #[cfg(feature = "terminal_color_cubes")]
+                    let _ = write!(stdout, "\x1b[38;5;{}m{}\x1b[0m", color.as_ascii(), ch);
+                    #[cfg(feature = "terminal_color_rgb")]
+                    let _ = write!(
+                        stdout,
+                        "\x1b[38;2;{};{};{}m{}\x1b[0m",
+                        color.r(),
+                        color.g(),
+                        color.b(),
+                        ch
+                    );
+                    #[cfg(feature = "terminal_color_legacy")]
+                    #[cfg(not(feature = "styled"))]
+                    let _ = write!(stdout, "\x1b[{}m{}\x1b[0m", color.as_legacy(), ch);
+                    #[cfg(feature = "terminal_color_legacy")]
+                    #[cfg(feature = "styled")]
+                    let _ = write!(
+                        stdout,
+                        "\x1b[{};{}m{}\x1b[0m",
+                        style.as_ascii(),
+                        color.as_legacy(),
+                        ch
+                    );
                 }
                 let _ = writeln!(stdout, "\x1b[0m");
             }

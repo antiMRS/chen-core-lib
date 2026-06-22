@@ -61,7 +61,7 @@ impl Color {
         self.rgb[2]
     }
 
-    pub fn as_ascii(&self) -> u8 {
+    pub fn as_legacy(&self) -> u8 {
         match (self.r(), self.g(), self.b()) {
             (0, 0, 0) => 30,
             (255, 0, 0) => 31,
@@ -74,6 +74,33 @@ impl Color {
             _ => 0,
         }
     }
+    pub fn as_ascii(&self) -> u8 {
+        let r_idx = (self.rgb[0] as u16 + 25) / 51;
+        let g_idx = (self.rgb[1] as u16 + 25) / 51;
+        let b_idx = (self.rgb[2] as u16 + 25) / 51;
+
+        16 + (r_idx * 36 + g_idx * 6 + b_idx) as u8
+    }
+}
+
+#[cfg(feature = "styled")]
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+pub enum CharStyle {
+    #[default]
+    Normal,
+    Bold,
+    Underline,
+}
+
+#[cfg(feature = "styled")]
+impl CharStyle {
+    pub fn as_ascii(&self) -> u8 {
+        match self {
+            CharStyle::Normal => 0,
+            CharStyle::Bold => 1,
+            CharStyle::Underline => 4,
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -82,6 +109,8 @@ pub struct Sprite {
     size: Size,
     #[cfg(feature = "colored")]
     colors: Box<[Color]>,
+    #[cfg(feature = "styled")]
+    styles: Box<[CharStyle]>,
 }
 
 impl Sprite {
@@ -92,6 +121,8 @@ impl Sprite {
             size: Size::new(sx as u64, sy as u64),
             #[cfg(feature = "colored")]
             colors: vec![Color::default(); total].into_boxed_slice(),
+            #[cfg(feature = "styled")]
+            styles: vec![CharStyle::default(); total].into_boxed_slice(),
         }
     }
 
@@ -160,6 +191,10 @@ impl Sprite {
     pub fn get_color(&self, pos: &Position) -> Color {
         self.colors[pos.flat(&self.size) as usize]
     }
+
+    pub fn get_style(&self, pos: &Position) -> CharStyle {
+        self.styles[pos.flat(&self.size) as usize]
+    }
 }
 
 impl Clone for Sprite {
@@ -170,6 +205,8 @@ impl Clone for Sprite {
             size: self.size.clone(),
             #[cfg(feature = "colored")]
             colors: self.colors.clone(),
+            #[cfg(feature = "styled")]
+            styles: self.styles.clone(),
         }
     }
 }
