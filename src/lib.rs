@@ -112,12 +112,6 @@ mod test {
                     .clone()
                     .intersection(&cube1_pos, cube2.clone(), &cube2_pos)
             );
-            println!(
-                "{:?}",
-                cube1
-                    .clone()
-                    .addition(&cube1_pos, cube2.clone(), &cube2_pos)
-            );
         }
     }
 }
