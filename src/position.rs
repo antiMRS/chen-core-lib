@@ -43,10 +43,22 @@ impl<T: Copy + Default, const D: usize> Default for Dims<T, D> {
     }
 }
 
+///
+/// Stores position of point
+///
 #[derive(Debug, Clone, Default)]
 pub struct Position(Dims<i64, 2>);
 
 impl Position {
+    ///
+    /// Creates new position by its coordinates
+    ///
+    /// # Example
+    /// ```
+    /// # use RubyCoreLib::builtins::Position;
+    /// let pos = Position::new(1, 2);
+    /// ```
+    ///
     pub fn new(x: i64, y: i64) -> Self {
         Self(Dims::from([x, y]))
     }
@@ -59,20 +71,40 @@ impl Position {
         self.0[1]
     }
 
+    ///
+    /// Multiplies x and y by w
+    ///
+    /// # Example
+    /// ```
+    /// # use RubyCoreLib::builtins::Position;
+    /// let pos = Position::new(2, 3);
+    /// assert_eq!(pos.flat_mul(2), Position::new(4, 6))
+    ///
+    /// ```
+    ///
     pub fn flat_mul(mut self, w: i64) -> Self {
         self.0[0] *= w;
         self.0[1] *= w;
         self
     }
 
+    ///
+    /// Returns tuple of (x, y)
+    ///
     pub fn as_tuple(self) -> (i64, i64) {
         (self.x(), self.y())
     }
 
+    ///
+    /// Returns pos in flat to use in indexing
+    ///
     pub fn flat(&self, size: &Size) -> i64 {
         self.y() * (size.w() as i64) + self.x()
     }
 
+    ///
+    /// Restores position from flattened
+    ///
     pub fn from_flat(xy: i64, size: &Size) -> Self {
         let width = size.w() as i64;
         assert!(width > 0, "Width needs to be greater then 0");
@@ -81,9 +113,53 @@ impl Position {
         Position::new(x, y)
     }
 
+    ///
+    /// Adds x, y to pos
+    ///
+    /// # Example
+    /// ```no_run
+    ///
+    /// let pos = Position::new(2, 3);
+    /// assert_eq!(pos.add(2, 3), Position::new(4, 6))
+    ///
+    /// ```
+    ///
     pub fn add(&mut self, x: i64, y: i64) {
         self.0[0] += x;
         self.0[1] += y;
+    }
+
+    ///
+    /// Returns distantion between two points and rounds up.
+    ///
+    /// # Example
+    /// ```
+    /// # use RubyCoreLib::builtins::Position;
+    ///
+    /// let pos1 = Position::new(2, 1);
+    /// let pos2 = Position::new(5, 2);
+    ///
+    /// assert_eq!(pos1.dist(&pos2), 3);
+    /// ```
+    pub fn dist(&self, other: &Position) -> u64 {
+        ((self.x() - other.x()).pow(2) + (self.y() - other.y()).pow(2)).isqrt() as u64
+    }
+
+    ///
+    /// Returns squared distantion between two points.
+    /// Used in precision operations.
+    ///
+    /// # Example
+    /// ```
+    /// # use RubyCoreLib::builtins::Position;
+    ///
+    /// let pos1 = Position::new(2, 1);
+    /// let pos2 = Position::new(5, 2);
+    ///
+    /// assert_eq!(pos1.pdist(&pos2), 10);
+    /// ```
+    pub fn pdist(&self, other: &Position) -> i64 {
+        (self.x() - other.x()).pow(2) + (self.y() - other.y()).pow(2)
     }
 }
 
@@ -174,10 +250,23 @@ impl std::cmp::PartialEq for Vector {
     }
 }
 
+///
+/// Shows the size of the object
+///
 #[derive(Debug, Clone, Default)]
 pub struct Size(Dims<u64, 2>);
 
 impl Size {
+    ///
+    /// Creates new Size object
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use RubyCoreLib::builtins::Size;
+    /// let size = Size::new(10, 10);
+    /// ```
+    ///
     pub fn new(x: u64, y: u64) -> Self {
         Self(Dims::from([x, y]))
     }
@@ -190,12 +279,25 @@ impl Size {
         self.0[1]
     }
 
+    ///
+    /// Multiplies width and height by w
+    ///
+    /// # Example
+    /// ```
+    /// # use RubyCoreLib::builtins::Size;
+    /// let size = Size::new(4, 5);
+    /// assert_eq!(size.flat_mul(3), Size::new(12, 15));
+    /// ```
+    ///
     pub fn flat_mul(mut self, w: u64) -> Self {
         self.0[0] *= w;
         self.0[1] *= w;
         self
     }
 
+    ///
+    /// Returns flattened size
+    ///
     pub fn flat(&self) -> u64 {
         self.w() * self.h()
     }
@@ -216,7 +318,7 @@ impl std::fmt::Display for Size {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Geometry {
     dots: Box<[Position]>,
 }
@@ -225,13 +327,22 @@ use std::cmp::max;
 use std::cmp::min;
 
 impl Geometry {
+    ///
+    /// Creates new geometry by points
+    ///
+    /// # Example
+    /// ```
+    /// # use RubyCoreLib::builtins::{Geometry, Position};
+    /// let geo = Geometry::new(vec![Position::new(0, 0), Position::new(0, 6), Position::new(5, 6), Position::new(5, 0)]);
+    /// ```
+    /// This creates a geometry in the form of a 5 by 6 rectangle.
+    ///
     pub fn new(dots: Vec<Position>) -> Self {
         Self {
             dots: dots.into_boxed_slice(),
         }
     }
-    /// Creates a square geometry with side length `a`.
-    /// Vertices are in counter-clockwise order: (0,0), (a,0), (a,a), (0,a).
+
     pub fn new_square(a: u64) -> Self {
         let a = a as i64;
         let vertices = vec![
@@ -243,19 +354,18 @@ impl Geometry {
         Geometry::new(vertices)
     }
 
-    /// Returns the number of vertices.
-    pub fn len(&self) -> u64 {
-        self.dots.len() as u64
+    pub fn anti_negate(&mut self) {
+        todo!("Moves all the points so that there are no negative coordinates")
     }
 
-    /// Returns true if the geometry has no vertices.
+    pub fn len(&self) -> usize {
+        self.dots.len()
+    }
+
     pub fn is_empty(&self) -> bool {
         self.dots.is_empty()
     }
 
-    /// Returns the bounding box size of the geometry (without position).
-    /// The size is the width and height of the minimal axis-aligned rectangle
-    /// that contains all vertices.
     pub fn size(&self) -> Size {
         if self.is_empty() {
             return Size::default();
@@ -277,7 +387,6 @@ impl Geometry {
         Size::new(width, height)
     }
 
-    /// Returns the area of the polygon using the gause formula.
     pub fn square(&self) -> u64 {
         if self.dots.len() < 3 {
             return 0;
@@ -292,7 +401,6 @@ impl Geometry {
         (area.abs() / 2) as u64
     }
 
-    /// Returns the vertices in global coordinates (relative to `pos`).
     pub fn vertices_global(&self, pos: &Position) -> Vec<Position> {
         self.dots
             .iter()
@@ -300,7 +408,6 @@ impl Geometry {
             .collect()
     }
 
-    /// Returns the bounding box of the geometry placed at `pos` as (top-left corner, size).
     pub fn bounding_box(&self, pos: &Position) -> (Position, Size) {
         if self.is_empty() {
             return (Position::new(0, 0), Size::default());
@@ -323,14 +430,11 @@ impl Geometry {
         (top_left, Size::new(width, height))
     }
 
-    /// Checks if a point (in global coordinates) lies inside the geometry placed at `self_pos`.
-    /// Uses the ray casting algorithm (even-odd rule).
     pub fn are_in(&self, self_pos: &Position, pos: &Position) -> bool {
         if self.dots.len() < 3 {
             return false;
         }
 
-        // Transform point to local coordinates
         let px = pos.x() - self_pos.x();
         let py = pos.y() - self_pos.y();
 
@@ -340,12 +444,10 @@ impl Geometry {
             let v1 = &self.dots[i];
             let v2 = &self.dots[(i + 1) % n];
 
-            // Check if the point is exactly on a vertex or edge
             if Self::point_on_segment(px, py, v1.x(), v1.y(), v2.x(), v2.y()) {
                 return true;
             }
 
-            // Ray casting: check if edge crosses the horizontal ray to the right (positive x)
             let intersect = ((v1.y() > py) != (v2.y() > py))
                 && (px < (v2.x() - v1.x()) * (py - v1.y()) / (v2.y() - v1.y()) + v1.x());
             if intersect {
@@ -368,37 +470,29 @@ impl Geometry {
         dot <= squared_len
     }
 
-    /// Checks if two geometries (with their positions) intersect.
-    /// Works for arbitrary simple polygons (convex or concave) by checking:
-    /// - Any edge intersection between the two polygons.
-    /// - Any vertex of one inside the other.
     pub fn collide(&self, self_pos: &Position, other: &Geometry, other_pos: &Position) -> bool {
         if self.is_empty() || other.is_empty() {
             return false;
         }
 
-        // Quick bounding box check
         let (self_bb, self_size) = self.bounding_box(self_pos);
         let (other_bb, other_size) = other.bounding_box(other_pos);
         if !Self::bbox_intersect(&self_bb, &self_size, &other_bb, &other_size) {
             return false;
         }
 
-        // Check edge intersections
         let self_global = self.vertices_global(self_pos);
         let other_global = other.vertices_global(other_pos);
         if Self::edges_intersect(&self_global, &other_global) {
             return true;
         }
 
-        // Check if any vertex of self is inside other
         for v in &self_global {
             if other.are_in(other_pos, v) {
                 return true;
             }
         }
 
-        // Check if any vertex of other is inside self
         for v in &other_global {
             if self.are_in(self_pos, v) {
                 return true;
@@ -408,7 +502,6 @@ impl Geometry {
         false
     }
 
-    /// Checks if two axis-aligned bounding boxes intersect.
     fn bbox_intersect(a_pos: &Position, a_size: &Size, b_pos: &Position, b_size: &Size) -> bool {
         let a_left = a_pos.x();
         let a_right = a_pos.x() + a_size.w() as i64;
@@ -464,12 +557,10 @@ impl Geometry {
         let o3 = Self::orientation(x3, y3, x4, y4, x1, y1);
         let o4 = Self::orientation(x3, y3, x4, y4, x2, y2);
 
-        // General case
         if o1 != o2 && o3 != o4 {
             return true;
         }
 
-        // Special cases (collinear)
         if o1 == 0 && Self::on_segment(x1, y1, x3, y3, x2, y2) {
             return true;
         }
@@ -503,6 +594,22 @@ impl Geometry {
 }
 
 impl Geometry {
+    pub fn range(&self) -> u64 {
+        let pivot = self.pivot();
+        let mut maxx = 0;
+        let _ = self
+            .dots
+            .iter()
+            .map(|p| {
+                let d = pivot.dist(p);
+                if d > maxx {
+                    maxx = d;
+                }
+            })
+            .collect::<Vec<()>>();
+        maxx
+    }
+
     pub fn pivot(&self) -> Position {
         if self.is_empty() {
             return Position::new(0, 0);
@@ -635,51 +742,5 @@ impl Geometry {
         let x = a1.x() as f64 + t * (a2.x() - a1.x()) as f64;
         let y = a1.y() as f64 + t * (a2.y() - a1.y()) as f64;
         Some(Position::new(x.round() as i64, y.round() as i64))
-    }
-
-    /// Grekhem
-    fn convex_hull(points: &[Position]) -> Vec<Position> {
-        if points.len() <= 1 {
-            return points.to_vec();
-        }
-
-        let start = points
-            .iter()
-            .min_by(|a, b| match a.x().cmp(&b.x()) {
-                std::cmp::Ordering::Equal => a.y().cmp(&b.y()),
-                other => other,
-            })
-            .unwrap();
-
-        let mut sorted = points.to_vec();
-        sorted.sort_by(|a, b| {
-            let o = Self::orientation_pos(start, a, b);
-            if o == 0 {
-                let dist_a = (a.x() - start.x()).pow(2) + (a.y() - start.y()).pow(2);
-                let dist_b = (b.x() - start.x()).pow(2) + (b.y() - start.y()).pow(2);
-                dist_a.cmp(&dist_b)
-            } else {
-                o.cmp(&0)
-            }
-        });
-
-        let mut hull = Vec::new();
-        for p in &sorted {
-            while hull.len() >= 2 {
-                let last = hull.last().unwrap();
-                let second_last = &hull[hull.len() - 2];
-                if Self::orientation_pos(second_last, last, p) <= 0 {
-                    hull.pop();
-                } else {
-                    break;
-                }
-            }
-            hull.push(p.clone());
-        }
-        hull
-    }
-
-    fn orientation_pos(p: &Position, q: &Position, r: &Position) -> i64 {
-        (q.x() - p.x()) * (r.y() - p.y()) - (q.y() - p.y()) * (r.x() - p.x())
     }
 }
