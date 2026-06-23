@@ -1,29 +1,46 @@
 use crate::{
-    builtins::{Color, Position, Size, Sprite},
+    builtins::{Color, EMPTY_CHAR, Position, Size, Sprite},
     event::{Event, KeyEvent},
 };
 use font8x8::{BASIC_FONTS, UnicodeFonts};
 use minifb::{Key, Window, WindowOptions};
 
+const CHAR_WIDTH: usize = 8;
+const CHAR_HEIGHT: usize = 8;
+
+pub struct GuiConfig {
+    pub title: &'static str,
+    pub font: Box<dyn UnicodeFonts>,
+}
+
+impl GuiConfig {}
+
+impl Default for GuiConfig {
+    fn default() -> Self {
+        Self {
+            title: "RubyCore Screen",
+            font: Box::new(BASIC_FONTS),
+        }
+    }
+}
+
 pub struct GuiTerminal {
     window: Window,
     sprite: Sprite,
-    char_width: usize,
-    char_height: usize,
     scale: usize,
     pixel_buffer: Vec<u32>,
     need_redraw: bool,
+    pub config: GuiConfig,
 }
 
 impl GuiTerminal {
-    pub fn new(title: &str, cols: usize, rows: usize, char_size: usize, scale: usize) -> Self {
-        let char_w = char_size;
-        let char_h = char_size;
-        let win_w = cols * char_w * scale;
-        let win_h = rows * char_h * scale;
+    pub fn new(cols: usize, rows: usize, config: GuiConfig) -> Self {
+        let scale = 1;
+        let win_w = cols * CHAR_WIDTH * scale;
+        let win_h = rows * CHAR_HEIGHT * scale;
 
         let mut window = Window::new(
-            title,
+            config.title,
             win_w,
             win_h,
             WindowOptions {
@@ -43,12 +60,19 @@ impl GuiTerminal {
         GuiTerminal {
             window,
             sprite,
-            char_width: char_w,
-            char_height: char_h,
             scale,
             pixel_buffer,
             need_redraw: true,
+            config,
         }
+    }
+
+    pub fn scale(&self) -> usize {
+        self.scale
+    }
+
+    pub fn new_scale(&mut self, new: usize) {
+        self.scale = new;
     }
 
     pub fn sprite(&self) -> &Sprite {
@@ -66,7 +90,7 @@ impl GuiTerminal {
     }
 
     pub fn clear(&mut self) {
-        self.sprite.fill(' ');
+        self.sprite.fill(EMPTY_CHAR);
         #[cfg(feature = "colored")]
         {
             self.sprite.fill_color(Color::default());
@@ -81,13 +105,11 @@ impl GuiTerminal {
 
         let w = self.sprite.size().w() as usize;
         let h = self.sprite.size().h() as usize;
-        let cw = self.char_width;
-        let ch = self.char_height;
         let scale = self.scale;
         let win_w = self.window.get_size().0;
         let win_h = self.window.get_size().1;
 
-        let font = BASIC_FONTS;
+        let font = &self.config.font;
 
         self.pixel_buffer.fill(0xFF000000);
 
@@ -112,8 +134,8 @@ impl GuiTerminal {
                         let color = if pixel_on { fg } else { bg };
                         let argb = color_to_u32(color);
 
-                        let px = (x * cw + col) * scale;
-                        let py = (y * ch + row) * scale;
+                        let px = (x * CHAR_WIDTH + col) * scale;
+                        let py = (y * CHAR_HEIGHT + row) * scale;
 
                         for dy in 0..scale {
                             for dx in 0..scale {

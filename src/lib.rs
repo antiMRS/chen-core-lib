@@ -12,6 +12,9 @@ pub mod builtins {
 
 pub mod system {
     pub use crate::event::*;
+    #[cfg(windows)]
+    pub use crate::gui_screen::GuiConfig;
+    #[cfg(windows)]
     pub use crate::gui_screen::GuiTerminal;
     pub use crate::screen::Terminal;
 }
