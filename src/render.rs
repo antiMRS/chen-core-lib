@@ -80,6 +80,12 @@ impl Color {
 
         16 + (r_idx * 36 + g_idx * 6 + b_idx) as u8
     }
+
+    pub fn add_color(&mut self, other: Color) {
+        self.rgb[0] = self.rgb[0].saturating_add(other.rgb[0]);
+        self.rgb[1] = self.rgb[1].saturating_add(other.rgb[1]);
+        self.rgb[2] = self.rgb[2].saturating_add(other.rgb[2]);
+    }
 }
 
 #[cfg(feature = "styled")]
@@ -190,6 +196,13 @@ impl Sprite {
         self.chars.geometry_draw_filled(&self.size, geom, pos, what);
     }
 
+    pub fn fill_with_f<T>(&mut self, f: T)
+    where
+        T: FnMut(u64, u64) -> char,
+    {
+        self.chars.fill_with_f(&self.size, f);
+    }
+
     // ====================== colors ========================
 
     #[cfg(feature = "colored")]
@@ -228,5 +241,18 @@ impl Sprite {
     #[cfg(feature = "styled")]
     pub fn get_style(&self, pos: &Position) -> CharStyle {
         self.styles.get(&self.size, pos)
+    }
+}
+
+// ====================== alpha ========================
+
+#[cfg(feature = "alpha")]
+impl Sprite {
+    pub fn alpha(&self) -> u8 {
+        self.alpha
+    }
+
+    pub fn set_alpha(&mut self, a: u8) {
+        self.alpha = a;
     }
 }
