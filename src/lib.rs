@@ -1,3 +1,4 @@
+mod buffer;
 mod event;
 #[cfg(windows)]
 mod gui_screen;
@@ -34,12 +35,6 @@ mod test {
     fn main_test() {
         let mut screen = screen::Terminal::new("Test terminal", 100, 100);
         screen.render();
-    }
-
-    #[test]
-    fn positions() {
-        let buf: Buffer<char> = Buffer::new(10, 10);
-        println!("{:?}", buf);
     }
 
     #[test]
@@ -88,4 +83,41 @@ mod test {
 
     #[test]
     fn color() {}
+
+    #[test]
+    fn geometry_transform() {
+        let cube1 = Geometry::new(vec![pos!(0, 0), pos!(0, 5), pos!(8, 5), pos!(8, 0)]); // rectangle 8 x 5
+        let cube2 = Geometry::new_square(5); // rectangle 5 x 5
+
+        // pivot
+        assert_eq!(cube1.pivot(), pos!(4, 2));
+        assert_eq!(cube2.pivot(), pos!(2, 2));
+
+        //rotation
+        {
+            let mut cube1 = cube1.clone();
+            let mut cube2 = cube2.clone();
+            cube1.rotate(90);
+            cube2.rotate(90);
+        }
+
+        // intersection and addition
+        {
+            let cube1_pos = pos!(0, 0);
+            let cube2_pos = pos!(4, 2);
+
+            println!(
+                "{:?}",
+                cube1
+                    .clone()
+                    .intersection(&cube1_pos, cube2.clone(), &cube2_pos)
+            );
+            println!(
+                "{:?}",
+                cube1
+                    .clone()
+                    .addition(&cube1_pos, cube2.clone(), &cube2_pos)
+            );
+        }
+    }
 }
