@@ -501,3 +501,185 @@ impl Geometry {
         qx <= max(px, rx) && qx >= min(px, rx) && qy <= max(py, ry) && qy >= min(py, ry)
     }
 }
+
+impl Geometry {
+    pub fn pivot(&self) -> Position {
+        if self.is_empty() {
+            return Position::new(0, 0);
+        }
+        let mut sum_x = 0i64;
+        let mut sum_y = 0i64;
+        for v in self.dots.iter() {
+            sum_x += v.x();
+            sum_y += v.y();
+        }
+        let n = self.dots.len() as i64;
+        Position::new(sum_x / n, sum_y / n)
+    }
+
+    pub fn rotate(&mut self, deg: usize) {
+        if self.is_empty() {
+            return;
+        }
+        let pivot = self.pivot();
+        let angle = (deg as f64).to_radians();
+        let cos = angle.cos();
+        let sin = angle.sin();
+
+        for v in self.dots.iter_mut() {
+            let dx = v.x() - pivot.x();
+            let dy = v.y() - pivot.y();
+
+            let new_x = dx as f64 * cos - dy as f64 * sin;
+            let new_y = dx as f64 * sin + dy as f64 * cos;
+
+            *v = Position::new(
+                pivot.x() + new_x.round() as i64,
+                pivot.y() + new_y.round() as i64,
+            );
+        }
+    }
+
+    pub fn intersection(
+        self,
+        self_pos: &Position,
+        other: Geometry,
+        other_pos: &Position,
+    ) -> Option<Geometry> {
+        if self.is_empty() || other.is_empty() {
+            return None;
+        }
+
+        let (self_bb, self_size) = self.bounding_box(self_pos);
+        let (other_bb, other_size) = other.bounding_box(other_pos);
+        if !Self::bbox_intersect(&self_bb, &self_size, &other_bb, &other_size) {
+            return None;
+        }
+
+        let mut subject = self.vertices_global(self_pos);
+        let object = other.vertices_global(other_pos);
+
+        for i in 0..object.len() {
+            let p1 = &object[i];
+            let p2 = &object[(i + 1) % object.len()];
+
+            let mut output = Vec::new();
+            let n = subject.len();
+            if n == 0 {
+                break;
+            }
+
+            let mut prev = subject[n - 1].clone();
+            let mut prev_inside = Self::is_left(p1, p2, &prev) >= 0;
+
+            for j in 0..n {
+                let current = &subject[j];
+                let current_inside = Self::is_left(p1, p2, current) >= 0;
+
+                if current_inside {
+                    if !prev_inside {
+                        if let Some(intersect) =
+                            Self::segment_intersection_point(&prev, current, p1, p2)
+                        {
+                            output.push(intersect);
+                        }
+                    }
+                    output.push(current.clone());
+                } else {
+                    if prev_inside {
+                        if let Some(intersect) =
+                            Self::segment_intersection_point(&prev, current, p1, p2)
+                        {
+                            output.push(intersect);
+                        }
+                    }
+                }
+
+                prev = current.clone();
+                prev_inside = current_inside;
+            }
+
+            subject = output;
+            if subject.is_empty() {
+                return None;
+            }
+        }
+
+        Some(Geometry::new(subject))
+    }
+
+    fn is_left(p1: &Position, p2: &Position, p: &Position) -> i64 {
+        (p2.x() - p1.x()) * (p.y() - p1.y()) - (p2.y() - p1.y()) * (p.x() - p1.x())
+    }
+
+    fn segment_intersection_point(
+        a1: &Position,
+        a2: &Position,
+        b1: &Position,
+        b2: &Position,
+    ) -> Option<Position> {
+        let denom = (a1.x() - a2.x()) as f64 * (b1.y() - b2.y()) as f64
+            - (a1.y() - a2.y()) as f64 * (b1.x() - b2.x()) as f64;
+        if denom.abs() < 1e-9 {
+            return None;
+        }
+
+        let t = ((a1.x() - b1.x()) as f64 * (b1.y() - b2.y()) as f64
+            - (a1.y() - b1.y()) as f64 * (b1.x() - b2.x()) as f64)
+            / denom;
+
+        if t < 0.0 || t > 1.0 {
+            return None;
+        }
+
+        let x = a1.x() as f64 + t * (a2.x() - a1.x()) as f64;
+        let y = a1.y() as f64 + t * (a2.y() - a1.y()) as f64;
+        Some(Position::new(x.round() as i64, y.round() as i64))
+    }
+
+    /// Grekhem
+    fn convex_hull(points: &[Position]) -> Vec<Position> {
+        if points.len() <= 1 {
+            return points.to_vec();
+        }
+
+        let start = points
+            .iter()
+            .min_by(|a, b| match a.x().cmp(&b.x()) {
+                std::cmp::Ordering::Equal => a.y().cmp(&b.y()),
+                other => other,
+            })
+            .unwrap();
+
+        let mut sorted = points.to_vec();
+        sorted.sort_by(|a, b| {
+            let o = Self::orientation_pos(start, a, b);
+            if o == 0 {
+                let dist_a = (a.x() - start.x()).pow(2) + (a.y() - start.y()).pow(2);
+                let dist_b = (b.x() - start.x()).pow(2) + (b.y() - start.y()).pow(2);
+                dist_a.cmp(&dist_b)
+            } else {
+                o.cmp(&0)
+            }
+        });
+
+        let mut hull = Vec::new();
+        for p in &sorted {
+            while hull.len() >= 2 {
+                let last = hull.last().unwrap();
+                let second_last = &hull[hull.len() - 2];
+                if Self::orientation_pos(second_last, last, p) <= 0 {
+                    hull.pop();
+                } else {
+                    break;
+                }
+            }
+            hull.push(p.clone());
+        }
+        hull
+    }
+
+    fn orientation_pos(p: &Position, q: &Position, r: &Position) -> i64 {
+        (q.x() - p.x()) * (r.y() - p.y()) - (q.y() - p.y()) * (r.x() - p.x())
+    }
+}
