@@ -85,7 +85,7 @@ impl GuiTerminal {
     }
 
     pub fn blit(&mut self, sprite: &Sprite, pos: &Position) {
-        self.sprite.draw_sprite(sprite, pos);
+        self.sprite.blit_sprite(sprite, pos);
         self.need_redraw = true;
     }
 

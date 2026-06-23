@@ -139,6 +139,35 @@ impl Sprite {
             .draw(&self.size, &sprite.styles, &sprite.size, pos);
     }
 
+    pub fn blit_sprite(&mut self, sprite: &Sprite, pos: &Position) {
+        let w = self.size.w() as i64;
+        let h = self.size.h() as i64;
+
+        for i in 0..sprite.chars.buf.len() {
+            let local_pos = Position::from_flat(i as i64, &sprite.size);
+            let target_x = local_pos.x() + pos.x();
+            let target_y = local_pos.y() + pos.y();
+            if target_x < 0 || target_y < 0 || target_x >= w || target_y >= h {
+                continue;
+            }
+            let target_pos = Position::new(target_x, target_y);
+            let target_idx = target_pos.flat(&self.size) as usize;
+            let src_idx = i;
+
+            if sprite.chars.buf[src_idx] != EMPTY_CHAR {
+                self.chars.buf[target_idx] = sprite.chars.buf[src_idx];
+                #[cfg(feature = "colored")]
+                {
+                    self.colors.buf[target_idx] = sprite.colors.buf[src_idx];
+                }
+                #[cfg(feature = "styled")]
+                {
+                    self.styles.buf[target_idx] = sprite.styles.buf[src_idx];
+                }
+            }
+        }
+    }
+
     // ====================== chars ========================
 
     pub fn get_char(&self, pos: &Position) -> char {
