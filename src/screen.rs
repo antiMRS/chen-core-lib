@@ -25,7 +25,8 @@ impl Terminal {
     }
 
     pub fn blit(&mut self, sprite: &Sprite, pos: &Position) {
-        self.buf.draw_sprite(sprite, pos);
+        self.buf
+            .draw_sprite(sprite, pos.x() as usize, pos.y() as usize);
     }
 
     pub fn clear(&mut self) {
@@ -50,8 +51,7 @@ impl Terminal {
         {
             for y in 0..h {
                 for x in 0..w {
-                    let pos = Position::new(x as i64, y as i64);
-                    let ch = self.buf.get_char(&pos);
+                    let ch = self.buf.get_char(x, y);
                     let _ = write!(stdout, "{}", ch);
                 }
                 let _ = writeln!(stdout);
@@ -66,9 +66,8 @@ impl Terminal {
                     #[cfg(feature = "terminal_color_legacy")]
                     use crate::render::CharStyle;
 
-                    let pos = Position::new(x as i64, y as i64);
-                    let ch = self.buf.get_char(&pos);
-                    let color = self.buf.get_color(&pos);
+                    let ch = self.buf.get_char(x, y);
+                    let color = self.buf.get_color(x, y);
                     #[cfg(feature = "styled")]
                     let style = self.buf.get_style(&pos);
 

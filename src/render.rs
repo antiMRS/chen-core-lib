@@ -134,12 +134,12 @@ impl Sprite {
         &self.size
     }
 
-    pub fn draw_sprite(&mut self, sprite: &Sprite, pos: &Position) {
+    pub fn draw_sprite(&mut self, sprite: &Sprite, x: usize, y: usize) {
         self.chars
-            .draw(&self.size, &sprite.chars, &sprite.size, pos);
+            .draw(&self.size, &sprite.chars, &sprite.size, x, y);
         #[cfg(feature = "colored")]
         self.colors
-            .draw(&self.size, &sprite.colors, &sprite.size, pos);
+            .draw(&self.size, &sprite.colors, &sprite.size, x, y);
         #[cfg(feature = "styled")]
         self.styles
             .draw(&self.size, &sprite.styles, &sprite.size, pos);
@@ -176,12 +176,12 @@ impl Sprite {
 
     // ====================== chars ========================
 
-    pub fn get_char(&self, pos: &Position) -> char {
-        self.chars.get(&self.size, pos)
+    pub fn get_char(&self, x: usize, y: usize) -> char {
+        self.chars.get(&self.size, x, y)
     }
 
-    pub fn draw(&mut self, chr: char, pos: &Position) {
-        self.chars.set(&self.size, pos, chr)
+    pub fn draw(&mut self, chr: char, x: usize, y: usize) {
+        self.chars.set(&self.size, x, y, chr)
     }
 
     pub fn fill(&mut self, chr: char) {
@@ -206,8 +206,8 @@ impl Sprite {
     // ====================== colors ========================
 
     #[cfg(feature = "colored")]
-    pub fn get_color(&self, pos: &Position) -> Color {
-        self.colors.get(&self.size, pos)
+    pub fn get_color(&self, x: usize, y: usize) -> Color {
+        self.colors.get(&self.size, x, y)
     }
 
     #[cfg(feature = "colored")]
@@ -226,14 +226,14 @@ impl Sprite {
     }
 
     #[cfg(feature = "colored")]
-    pub fn paint(&mut self, color: Color, pos: &Position) {
-        self.colors.set(&self.size, pos, color)
+    pub fn paint(&mut self, color: Color, x: usize, y: usize) {
+        self.colors.set(&self.size, x, y, color)
     }
 
     #[cfg(feature = "colored")]
-    pub fn draw_colored(&mut self, chr: char, pos: &Position, color: Color) {
-        self.chars.set(&self.size, pos, chr);
-        self.colors.set(&self.size, pos, color);
+    pub fn draw_colored(&mut self, chr: char, x: usize, y: usize, color: Color) {
+        self.chars.set(&self.size, x, y, chr);
+        self.colors.set(&self.size, x, y, color);
     }
 
     // ====================== styles ========================

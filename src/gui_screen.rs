@@ -115,12 +115,11 @@ impl GuiTerminal {
 
         for y in 0..h {
             for x in 0..w {
-                let pos = Position::new(x as i64, y as i64);
-                let chr = self.sprite.get_char(&pos);
+                let chr = self.sprite.get_char(x, y);
 
                 // Цвета
                 #[cfg(feature = "colored")]
-                let fg = self.sprite.get_color(&pos);
+                let fg = self.sprite.get_color(x, y);
                 #[cfg(not(feature = "colored"))]
                 let fg = Color::new(255, 255, 255);
 

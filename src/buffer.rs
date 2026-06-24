@@ -21,12 +21,12 @@ impl<T: Default + Copy> Buffer<T> {
         }
     }
 
-    pub fn get(&self, size: &Size, pos: &Position) -> T {
-        self.buf[pos.flat(size) as usize]
+    pub fn get(&self, size: &Size, x: usize, y: usize) -> T {
+        self.buf[Position::flattened(size, x, y)]
     }
 
-    pub fn set(&mut self, size: &Size, pos: &Position, what: T) {
-        let idx = pos.flat(size) as usize;
+    pub fn set(&mut self, size: &Size, x: usize, y: usize, what: T) {
+        let idx = Position::flattened(size, x, y);
         self.buf[idx] = what;
     }
 
@@ -42,24 +42,23 @@ impl<T: Default + Copy> Buffer<T> {
         for y in 0..size.h() {
             for x in 0..size.w() {
                 let ch = f(x, y);
-                self.buf[Position::new(x as i64, y as i64).flat(size) as usize] = ch;
+                self.buf[Position::flattened(size, x, y) as usize] = ch;
             }
         }
     }
 
-    pub fn draw(&mut self, size: &Size, other: &Self, other_size: &Size, pos: &Position) {
+    pub fn draw(&mut self, size: &Size, other: &Self, other_size: &Size, x: usize, y: usize) {
         let w = size.w() as i64;
         let h = size.h() as i64;
 
         for i in 0..other.buf.len() {
             let local_pos = Position::from_flat(i as i64, other_size);
-            let target_x = local_pos.x() + pos.x();
-            let target_y = local_pos.y() + pos.y();
+            let target_x = local_pos.x() + x as i64;
+            let target_y = local_pos.y() + y as i64;
             if target_x < 0 || target_y < 0 || target_x >= w || target_y >= h {
                 continue;
             }
-            let target_pos = Position::new(target_x, target_y);
-            let target_idx = target_pos.flat(size) as usize;
+            let target_idx = Position::flattened(size, target_x, target_y) as usize;
             let src_idx = i;
 
             self.buf[target_idx] = other.buf[src_idx];
@@ -73,7 +72,8 @@ impl<T: Clone + Copy + PartialEq + Default> Buffer<T> {
         size: &Size,
         other: &Self,
         other_size: &Size,
-        pos: &Position,
+        x: usize,
+        y: usize,
         empty: T,
     ) {
         let w = size.w() as i64;
@@ -81,14 +81,14 @@ impl<T: Clone + Copy + PartialEq + Default> Buffer<T> {
 
         for i in 0..other.buf.len() {
             let local_pos = Position::from_flat(i as i64, other_size);
-            let target_x = local_pos.x() + pos.x();
-            let target_y = local_pos.y() + pos.y();
+            let target_x = local_pos.x() + x as i64;
+            let target_y = local_pos.y() + y as i64;
             if target_x < 0 || target_y < 0 || target_x >= w || target_y >= h {
                 continue;
             }
-            let target_pos = Position::new(target_x, target_y);
-            let target_idx = target_pos.flat(size) as usize;
+            let target_idx = Position::flattened(size, target_x, target_y) as usize;
             let src_idx = i;
+
             if other.buf[src_idx] != empty {
                 self.buf[target_idx] = other.buf[src_idx];
             }
@@ -153,7 +153,7 @@ impl<T: Clone + Copy + Default> Buffer<T> {
                     let x1 = intersections[i];
                     let x2 = intersections[i + 1];
                     for x in x1..=x2 {
-                        self.set(size, &Position::new(x, y), what);
+                        self.set(size, x as usize, y as usize, what);
                     }
                 }
             }
@@ -179,7 +179,7 @@ impl<T: Clone + Copy + Default> Buffer<T> {
 
         loop {
             if x >= 0 && x < w && y >= 0 && y < h {
-                self.set(size, &Position::new(x, y), what.clone());
+                self.set(size, x as usize, y as usize, what.clone());
             }
             if x == x2 && y == y2 {
                 break;
