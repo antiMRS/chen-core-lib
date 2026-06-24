@@ -50,6 +50,20 @@ impl<T: Copy + Default, const D: usize> Default for Dims<T, D> {
 pub struct Position(Dims<i64, 2>);
 
 impl Position {
+    pub fn flattened<T: PrimInt + NumCast>(size: &Size, x: T, y: T) -> T {
+        y * (T::from::<u64>(size.w()).unwrap()) + x
+    }
+
+    pub fn from_flattened<T: PrimInt + NumCast + Euclid>(size: &Size, xy: T) -> (T, T) {
+        let width: T = T::from(size.w()).unwrap();
+        assert!(width > T::zero(), "Width needs to be greater then 0");
+        let x = xy.rem_euclid(&width);
+        let y = xy.div_euclid(&width);
+        (x, y)
+    }
+}
+
+impl Position {
     ///
     /// Creates new position by its coordinates
     ///
@@ -325,6 +339,8 @@ pub struct Geometry {
 
 use std::cmp::max;
 use std::cmp::min;
+
+use num_traits::{Euclid, Num, NumCast, PrimInt};
 
 impl Geometry {
     ///
