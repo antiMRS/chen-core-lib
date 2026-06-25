@@ -1,14 +1,26 @@
 // terminal.rs
-use crate::builtins::{EMPTY_CHAR, Position, Sprite};
+use crate::builtins::{Color, EMPTY_CHAR, Position, Sprite};
 
 use std::io::{self, Write};
 use std::process::Command;
 
+///
+/// Terminal screen
+///
 pub struct Terminal {
     buf: Sprite,
 }
 
 impl Terminal {
+    ///
+    /// Creates new terminal of size w * h with title title
+    ///
+    /// # Example
+    /// ```
+    /// # use rube_core_lib::system::Terminal;
+    /// let term = Terminal::new("Test", 10, 10);
+    /// ```
+    ///
     #[cfg(windows)]
     pub fn new(title: &str, w: usize, h: usize) -> Self {
         let _ = Command::new("title").arg(title).status();
@@ -24,15 +36,26 @@ impl Terminal {
         }
     }
 
+    ///
+    /// Draws sprite on a screen.
+    /// Skips cells with EMPTY_CHAR.
+    ///
     pub fn blit(&mut self, sprite: &Sprite, pos: &Position) {
         self.buf
             .draw_sprite(sprite, pos.x() as usize, pos.y() as usize);
     }
 
+    ///
+    /// Fills screen with EMPTY_CHAR and Color::black
+    ///
     pub fn clear(&mut self) {
         self.buf.fill(EMPTY_CHAR);
+        self.buf.fill_color(Color::new(0, 0, 0));
     }
 
+    ///
+    /// Draws buffer in console
+    ///
     pub fn render(&self) {
         #[cfg(windows)]
         {
@@ -51,7 +74,7 @@ impl Terminal {
         {
             for y in 0..h {
                 for x in 0..w {
-                    let ch = self.buf.get_char(x, y);
+                    let ch = self.buf.get_char(x, h - y);
                     let _ = write!(stdout, "{}", ch);
                 }
                 let _ = writeln!(stdout);
@@ -66,8 +89,8 @@ impl Terminal {
                     #[cfg(feature = "terminal_color_legacy")]
                     use crate::render::CharStyle;
 
-                    let ch = self.buf.get_char(x, y);
-                    let color = self.buf.get_color(x, y);
+                    let ch = self.buf.get_char(x, h - y - 1);
+                    let color = self.buf.get_color(x, h - y - 1);
                     #[cfg(feature = "styled")]
                     let style = self.buf.get_style(&pos);
 

@@ -24,6 +24,9 @@ impl Default for GuiConfig {
     }
 }
 
+///
+/// Screen in separated window
+///
 pub struct GuiTerminal {
     window: Window,
     sprite: Sprite,
@@ -115,11 +118,11 @@ impl GuiTerminal {
 
         for y in 0..h {
             for x in 0..w {
-                let chr = self.sprite.get_char(x, y);
+                let chr = self.sprite.get_char(x, h - y - 1);
 
                 // Цвета
                 #[cfg(feature = "colored")]
-                let fg = self.sprite.get_color(x, y);
+                let fg = self.sprite.get_color(x, h - y - 1);
                 #[cfg(not(feature = "colored"))]
                 let fg = Color::new(255, 255, 255);
 
