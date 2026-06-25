@@ -1,5 +1,5 @@
 // terminal.rs
-use crate::builtins::{EMPTY_CHAR, Position, Size, Sprite};
+use crate::builtins::{EMPTY_CHAR, Position, Sprite};
 
 use std::io::{self, Write};
 use std::process::Command;

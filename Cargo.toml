@@ -1,5 +1,5 @@
 [package]
-name = "RubyCoreLib"
+name = "ruby_core_lib"
 version = "0.0.1"
 edition = "2024"
 description = "Assets for terminal games."

@@ -241,6 +241,7 @@ impl Sprite {
 
 // ====================== alpha ========================
 
+/*
 #[cfg(feature = "alpha")]
 impl Sprite {
     pub fn alpha(&self) -> u8 {
@@ -251,3 +252,4 @@ impl Sprite {
         self.alpha = a;
     }
 }
+*/

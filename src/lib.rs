@@ -30,10 +30,10 @@ mod test {
         };
     }
 
-    use crate::{screen::Terminal, *};
+    use crate::*;
     #[test]
     fn main_test() {
-        let mut screen = screen::Terminal::new("Test terminal", 100, 100);
+        let screen = screen::Terminal::new("Test terminal", 100, 100);
         screen.render();
     }
 

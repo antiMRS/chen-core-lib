@@ -3,15 +3,6 @@
 version = 4
 
 [[package]]
-name = "RubyCoreLib"
-version = "0.0.1"
-dependencies = [
- "font8x8",
- "minifb",
- "num-traits",
-]
-
-[[package]]
 name = "autocfg"
 version = "1.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -409,6 +400,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5b44b894f2a6e36457d665d1e08c3866add6ed5e70050c1b4ba8a8ddedb02ce7"
 dependencies = [
  "bitflags 2.13.0",
+]
+
+[[package]]
+name = "ruby_core_lib"
+version = "0.0.1"
+dependencies = [
+ "font8x8",
+ "minifb",
+ "num-traits",
 ]
 
 [[package]]
