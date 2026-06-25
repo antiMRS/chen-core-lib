@@ -129,6 +129,9 @@ impl Sprite {
         &self.size
     }
 
+    ///
+    /// Replaces each character and color of one sprite with a character and color from another.
+    ///
     pub fn draw_sprite(&mut self, sprite: &Sprite, x: usize, y: usize) {
         self.chars
             .draw(&self.size, &sprite.chars, &sprite.size, x, y);
@@ -140,6 +143,9 @@ impl Sprite {
             .draw(&self.size, &sprite.styles, &sprite.size, pos);
     }
 
+    ///
+    /// Replaces each character and color of one sprite with a character and color from another. Skipping cells with EMPTY_CHAR. It is used in the blit functions of terminals.
+    ///
     pub fn blit_sprite(&mut self, sprite: &Sprite, pos: &Position) {
         let w = self.size.w() as i64;
         let h = self.size.h() as i64;
@@ -171,14 +177,23 @@ impl Sprite {
 
     // ====================== chars ========================
 
+    ///
+    /// Returns char as position `(x, y)`
+    ///
     pub fn get_char(&self, x: usize, y: usize) -> char {
         self.chars.get(&self.size, x, y)
     }
 
+    ///
+    /// Sets char as position `(x, y)` = `char`
+    ///
     pub fn draw(&mut self, chr: char, x: usize, y: usize) {
         self.chars.set(&self.size, x, y, chr)
     }
 
+    ///
+    /// Fill all sprite with char = `char`
+    ///
     pub fn fill(&mut self, chr: char) {
         self.chars.fill(&self.size, chr);
     }
@@ -191,49 +206,74 @@ impl Sprite {
         self.chars.geometry_draw_filled(&self.size, geom, pos, what);
     }
 
-    pub fn fill_with_f<T>(&mut self, f: T)
+    ///
+    /// Calls the function `f` for each position in the Sprite and puts the char returned by the function on it
+    ///
+    pub fn fill_char_with_f<T>(&mut self, f: T)
     where
         T: FnMut(u64, u64) -> char,
     {
         self.chars.fill_with_f(&self.size, f);
     }
+}
 
-    // ====================== colors ========================
+// ====================== colors ========================
 
-    #[cfg(feature = "colored")]
+#[cfg(feature = "colored")]
+impl Sprite {
+    ///
+    /// Returns color as position `(x, y)`
+    ///
     pub fn get_color(&self, x: usize, y: usize) -> Color {
         self.colors.get(&self.size, x, y)
     }
 
-    #[cfg(feature = "colored")]
     pub fn geometry_paint(&mut self, geom: &Geometry, pos: &Position, what: Color) {
         self.colors.geometry_draw(&self.size, geom, pos, what);
     }
-    #[cfg(feature = "colored")]
+
     pub fn geometry_paint_filled(&mut self, geom: &Geometry, pos: &Position, what: Color) {
         self.colors
             .geometry_draw_filled(&self.size, geom, pos, what);
     }
 
-    #[cfg(feature = "colored")]
+    ///
+    /// Fill all sprite with color = `color`
+    ///
     pub fn fill_color(&mut self, color: Color) {
         self.colors.fill(&self.size, color);
     }
 
-    #[cfg(feature = "colored")]
+    ///
+    /// Sets color as position `(x, y)` = `color`
+    ///
     pub fn paint(&mut self, color: Color, x: usize, y: usize) {
         self.colors.set(&self.size, x, y, color)
     }
 
-    #[cfg(feature = "colored")]
-    pub fn draw_colored(&mut self, chr: char, x: usize, y: usize, color: Color) {
+    ///
+    /// Sets char and color at position `(x, y)`
+    ///
+    pub fn paint_colored(&mut self, chr: char, x: usize, y: usize, color: Color) {
         self.chars.set(&self.size, x, y, chr);
         self.colors.set(&self.size, x, y, color);
     }
 
-    // ====================== styles ========================
+    ///
+    /// Calls the function `f` for each position in the Sprite and puts the color returned by the function on it
+    ///
+    pub fn fill_color_with_f<T>(&mut self, f: T)
+    where
+        T: FnMut(u64, u64) -> Color,
+    {
+        self.colors.fill_with_f(&self.size, f);
+    }
+}
 
-    #[cfg(feature = "styled")]
+// ====================== styles ========================
+
+#[cfg(feature = "styled")]
+impl Sprite {
     pub fn get_style(&self, pos: &Position) -> CharStyle {
         self.styles.get(&self.size, pos)
     }
