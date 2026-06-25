@@ -1,5 +1,5 @@
 use crate::{
-    builtins::{Color, EMPTY_CHAR, Position, Size, Sprite},
+    builtins::{Color, EMPTY_CHAR, Position, Sprite},
     event::{Event, KeyEvent},
 };
 use font8x8::{BASIC_FONTS, UnicodeFonts};
@@ -127,9 +127,9 @@ impl GuiTerminal {
 
                 let glyph = font.get(chr).unwrap_or_else(|| font.get('?').unwrap());
 
-                for row in 0..8 {
+                for (row, row_m) in glyph.iter().enumerate() {
                     for col in 0..8 {
-                        let pixel_on = (glyph[row] >> (7 - col)) & 1 == 1;
+                        let pixel_on = (row_m >> (7 - col)) & 1 == 1;
                         let color = if pixel_on { fg } else { bg };
                         let argb = color_to_u32(color);
 

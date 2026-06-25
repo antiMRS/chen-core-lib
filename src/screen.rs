@@ -36,7 +36,7 @@ impl Terminal {
     pub fn render(&self) {
         #[cfg(windows)]
         {
-            let _ = Command::new("cmd").args(&["/c", "cls"]).status();
+            let _ = Command::new("cmd").args(["/c", "cls"]).status();
         }
         #[cfg(unix)]
         {

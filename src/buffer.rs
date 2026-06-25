@@ -1,4 +1,3 @@
-use crate::builtins::Color;
 use crate::builtins::{Geometry, Position, Size};
 use std::fmt::Debug;
 
@@ -179,7 +178,7 @@ impl<T: Clone + Copy + Default> Buffer<T> {
 
         loop {
             if x >= 0 && x < w && y >= 0 && y < h {
-                self.set(size, x as usize, y as usize, what.clone());
+                self.set(size, x as usize, y as usize, what);
             }
             if x == x2 && y == y2 {
                 break;

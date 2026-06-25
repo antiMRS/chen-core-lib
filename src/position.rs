@@ -13,9 +13,7 @@ impl<T: Copy, const D: usize> From<[T; D]> for Dims<T, D> {
 
 impl<T: Copy, const D: usize> Clone for Dims<T, D> {
     fn clone(&self) -> Self {
-        Self {
-            dims: self.dims.clone(),
-        }
+        *self
     }
 }
 
@@ -242,10 +240,7 @@ impl Vector {
     }
 
     pub fn between(from: &Position, to: &Position) -> Self {
-        Self::new(
-            (to.x() as i64) - (from.x() as i64),
-            (to.y() as i64) - (from.y() as i64),
-        )
+        Self::new(to.x() - from.x(), to.y() - from.y())
     }
 }
 
@@ -340,7 +335,7 @@ pub struct Geometry {
 use std::cmp::max;
 use std::cmp::min;
 
-use num_traits::{Euclid, Num, NumCast, PrimInt};
+use num_traits::{Euclid, NumCast, PrimInt};
 
 impl Geometry {
     ///
@@ -695,26 +690,22 @@ impl Geometry {
             let mut prev = subject[n - 1].clone();
             let mut prev_inside = Self::is_left(p1, p2, &prev) >= 0;
 
-            for j in 0..n {
-                let current = &subject[j];
+            for current in subject.iter().take(n) {
                 let current_inside = Self::is_left(p1, p2, current) >= 0;
 
-                if current_inside {
-                    if !prev_inside {
-                        if let Some(intersect) =
-                            Self::segment_intersection_point(&prev, current, p1, p2)
-                        {
-                            output.push(intersect);
-                        }
+                if current_inside && !prev_inside {
+                    if let Some(intersect) =
+                        Self::segment_intersection_point(&prev, current, p1, p2)
+                    {
+                        output.push(intersect);
                     }
                     output.push(current.clone());
                 } else {
-                    if prev_inside {
-                        if let Some(intersect) =
+                    if prev_inside
+                        && let Some(intersect) =
                             Self::segment_intersection_point(&prev, current, p1, p2)
-                        {
-                            output.push(intersect);
-                        }
+                    {
+                        output.push(intersect);
                     }
                 }
 

@@ -45,11 +45,6 @@ impl Color {
             rgb: Dims::from([r, g, b]),
         }
     }
-    pub fn default() -> Self {
-        Self {
-            rgb: Dims::default(),
-        }
-    }
     pub fn r(&self) -> u8 {
         self.rgb[0]
     }
