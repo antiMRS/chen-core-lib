@@ -1,6 +1,6 @@
 mod buffer;
 mod event;
-#[cfg(windows)]
+#[cfg(feature = "use_gui")]
 mod gui_screen;
 mod position;
 mod render;
@@ -13,9 +13,9 @@ pub mod builtins {
 
 pub mod system {
     pub use crate::event::*;
-    #[cfg(windows)]
+    #[cfg(feature = "use_gui")]
     pub use crate::gui_screen::GuiConfig;
-    #[cfg(windows)]
+    #[cfg(feature = "use_gui")]
     pub use crate::gui_screen::GuiTerminal;
     pub use crate::screen::Terminal;
 }
