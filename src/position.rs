@@ -9,6 +9,12 @@ pub(super) struct Dims<T: Copy, const D: usize> {
     dims: [T; D],
 }
 
+impl<T: Copy, const D: usize> Dims<T, D> {
+    pub const fn new(v: [T; D]) -> Self {
+        Self { dims: v }
+    }
+}
+
 impl<T: Copy, const D: usize> From<[T; D]> for Dims<T, D> {
     fn from(value: [T; D]) -> Self {
         Self { dims: value }
@@ -75,8 +81,8 @@ impl Position {
     /// let pos = Position::new(1, 2);
     /// ```
     ///
-    pub fn new(x: i64, y: i64) -> Self {
-        Self(Dims::from([x, y]))
+    pub const fn new(x: i64, y: i64) -> Self {
+        Self(Dims::new([x, y]))
     }
 
     pub fn x(&self) -> i64 {
@@ -199,12 +205,12 @@ impl std::cmp::PartialEq for Position {
 pub struct Vector(Dims<i64, 2>);
 
 impl Vector {
-    pub fn new(w: i64, h: i64) -> Self {
-        Self(Dims::from([w, h]))
+    pub const fn new(w: i64, h: i64) -> Self {
+        Self(Dims::new([w, h]))
     }
 
-    pub fn zero() -> Self {
-        Self(Dims::from([0, 0]))
+    pub const fn zero() -> Self {
+        Self(Dims::new([0, 0]))
     }
 
     pub fn i(&self) -> i64 {
@@ -294,8 +300,8 @@ impl Size {
     /// let size = Size::new(10, 10);
     /// ```
     ///
-    pub fn new(x: u64, y: u64) -> Self {
-        Self(Dims::from([x, y]))
+    pub const fn new(x: u64, y: u64) -> Self {
+        Self(Dims::new([x, y]))
     }
 
     pub fn w(&self) -> u64 {

@@ -8,8 +8,8 @@ use crate::buffer::Buffer;
 pub struct UDim(Dims<f64, 2>);
 
 impl UDim {
-    pub fn new(x: f64, y: f64) -> Self {
-        Self(Dims::from([x, y]))
+    pub const fn new(x: f64, y: f64) -> Self {
+        Self(Dims::new([x, y]))
     }
     pub fn x(&self) -> f64 {
         self.0[0]
@@ -40,9 +40,9 @@ pub struct Color {
 }
 
 impl Color {
-    pub fn new(r: u8, g: u8, b: u8) -> Self {
+    pub const fn new(r: u8, g: u8, b: u8) -> Self {
         Self {
-            rgb: Dims::from([r, g, b]),
+            rgb: Dims::new([r, g, b]),
         }
     }
     pub fn r(&self) -> u8 {
