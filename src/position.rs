@@ -693,11 +693,13 @@ impl Geometry {
             for current in subject.iter().take(n) {
                 let current_inside = Self::is_left(p1, p2, current) >= 0;
 
-                if current_inside && !prev_inside {
-                    if let Some(intersect) =
-                        Self::segment_intersection_point(&prev, current, p1, p2)
-                    {
-                        output.push(intersect);
+                if current_inside {
+                    if !prev_inside {
+                        if let Some(intersect) =
+                            Self::segment_intersection_point(&prev, current, p1, p2)
+                        {
+                            output.push(intersect);
+                        }
                     }
                     output.push(current.clone());
                 } else {
