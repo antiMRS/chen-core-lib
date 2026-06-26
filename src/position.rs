@@ -1,4 +1,8 @@
+use std::cmp::max;
+use std::cmp::min;
 use std::ops::{Index, IndexMut};
+
+use num_traits::{Euclid, NumCast, PrimInt};
 
 #[derive(Debug, PartialEq)]
 pub(super) struct Dims<T: Copy, const D: usize> {
@@ -126,19 +130,20 @@ impl Position {
     }
 
     ///
-    /// Adds x, y to pos
+    /// Adds vector to position
     ///
     /// # Example
     /// ```no_run
     ///
     /// let pos = Position::new(2, 3);
-    /// assert_eq!(pos.add(2, 3), Position::new(4, 6))
+    /// let vec = Vector::new(2, 3);
+    /// assert_eq!(pos.add(vec), Position::new(4, 6))
     ///
     /// ```
     ///
-    pub fn add(&mut self, x: i64, y: i64) {
-        self.0[0] += x;
-        self.0[1] += y;
+    pub fn add(&mut self, vec: Vector) {
+        self.0[0] += vec.i();
+        self.0[1] += vec.j();
     }
 
     ///
@@ -190,27 +195,16 @@ impl std::cmp::PartialEq for Position {
     }
 }
 
-/*
-
-Coordinate System
-  0
- 0 +===================
-   =
-   =
-   =
-   =
-   =
-   =
-   =
-
-*/
-
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Copy)]
 pub struct Vector(Dims<i64, 2>);
 
 impl Vector {
     pub fn new(w: i64, h: i64) -> Self {
         Self(Dims::from([w, h]))
+    }
+
+    pub fn zero() -> Self {
+        Self(Dims::from([0, 0]))
     }
 
     pub fn i(&self) -> i64 {
@@ -221,12 +215,12 @@ impl Vector {
         self.0[1]
     }
 
-    pub fn lenght2(&self) -> i64 {
+    pub fn plenght(&self) -> i64 {
         self.i().pow(2) + self.j().pow(2)
     }
 
     pub fn lenght(&self) -> i64 {
-        self.lenght2().isqrt()
+        self.plenght().isqrt()
     }
 
     pub fn flat_mul(mut self, w: i64) -> Self {
@@ -235,12 +229,36 @@ impl Vector {
         self
     }
 
-    pub fn dot_product(&self, other: &Vector) -> i64 {
+    pub fn dot_product(&self, other: Vector) -> i64 {
         self.i() * other.i() + self.j() * other.j()
     }
 
     pub fn between(from: &Position, to: &Position) -> Self {
         Self::new(to.x() - from.x(), to.y() - from.y())
+    }
+}
+
+impl std::ops::Add for Vector {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Self::new(self.i() + rhs.i(), self.j() + rhs.j())
+    }
+}
+
+impl std::ops::Sub for Vector {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        self + (-rhs)
+    }
+}
+
+impl std::ops::Neg for Vector {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        Self::new(-self.i(), -self.j())
     }
 }
 
@@ -332,11 +350,6 @@ pub struct Geometry {
     dots: Box<[Position]>,
 }
 
-use std::cmp::max;
-use std::cmp::min;
-
-use num_traits::{Euclid, NumCast, PrimInt};
-
 impl Geometry {
     ///
     /// Creates new geometry by points
@@ -354,6 +367,9 @@ impl Geometry {
         }
     }
 
+    ///
+    /// Returns square geometry of size `Size(a, a)`
+    ///
     pub fn new_square(a: u64) -> Self {
         let a = a as i64;
         let vertices = vec![
@@ -365,8 +381,40 @@ impl Geometry {
         Geometry::new(vertices)
     }
 
+    ///
+    /// Returns empty geometry
+    ///
+    /// # Example
+    /// ```
+    /// # use ruby_core_lib::builtins::{Geometry, Position};
+    /// assert_eq!(Geometry::empty(), Geometry::new(vec![]));
+    /// ```
+    ///
+    pub fn empty() -> Self {
+        Self { dots: Box::new([]) }
+    }
+
     pub fn anti_negate(&mut self) {
-        todo!("Moves all the points so that there are no negative coordinates")
+        if self.is_empty() {
+            return;
+        }
+
+        let mut min_x = self.dots[0].x();
+        let mut min_y = self.dots[0].y();
+        for v in self.dots.iter() {
+            if v.x() < min_x {
+                min_x = v.x();
+            }
+            if v.y() < min_y {
+                min_y = v.y();
+            }
+        }
+
+        let dx = -min_x;
+        let dy = -min_y;
+        for v in self.dots.iter_mut() {
+            *v = Position::new(v.x() + dx, v.y() + dy);
+        }
     }
 
     pub fn len(&self) -> usize {
