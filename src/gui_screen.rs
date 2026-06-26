@@ -158,7 +158,7 @@ impl GuiTerminal {
 
                 for (row, row_m) in glyph.iter().enumerate() {
                     for col in 0..8 {
-                        let pixel_on = (row_m >> (7 - col)) & 1 == 1;
+                        let pixel_on = (row_m >> col) & 1 == 1;
                         let color = if pixel_on { fg } else { bg };
                         let argb = color_to_u32(color);
 
