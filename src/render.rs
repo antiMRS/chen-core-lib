@@ -45,6 +45,19 @@ impl Color {
             rgb: Dims::new([r, g, b]),
         }
     }
+
+    pub const fn red() -> Self {
+        Self::new(255, 0, 0)
+    }
+
+    pub const fn green() -> Self {
+        Self::new(0, 255, 0)
+    }
+
+    pub const fn blue() -> Self {
+        Self::new(0, 0, 255)
+    }
+
     pub fn r(&self) -> u8 {
         self.rgb[0]
     }

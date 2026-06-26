@@ -6,6 +6,8 @@ mod position;
 mod render;
 mod screen;
 
+pub mod utils;
+
 pub mod builtins {
     pub use crate::position::*;
     pub use crate::render::*;
@@ -112,6 +114,50 @@ mod test {
                     .clone()
                     .intersection(&cube1_pos, cube2.clone(), &cube2_pos)
             );
+        }
+    }
+
+    fn intersection_test() {
+        let cube1_geo = Geometry::new(vec![pos!(0, 0), pos!(0, 5), pos!(8, 5), pos!(8, 0)]); // rectangle 8 x 5
+        let cube2_geo = Geometry::new_square(5); // rectangle 5 x 5
+        let cube1_p = Position::new(6, 5);
+        let cube2_p = Position::new(2, 3);
+
+        let mut cubes_sp = Sprite::new(20, 20);
+
+        cubes_sp.geometry_draw(&cube1_geo, &cube1_p, 'H');
+        cubes_sp.geometry_paint(&cube1_geo, &cube1_p, Color::new(255, 255, 255));
+
+        cubes_sp.geometry_draw(&cube2_geo, &cube2_p, 'G');
+        cubes_sp.geometry_paint(&cube2_geo, &cube2_p, Color::new(255, 255, 255));
+
+        let cube_int = cube1_geo
+            .clone()
+            .intersection(&cube1_p, cube2_geo, &cube2_p)
+            .unwrap_or(Geometry::new_square(0));
+        let mut cube_int_sp = Sprite::new(20, 20);
+        cube_int_sp.geometry_paint(&cube_int, &pos!(0, 0), Color::new(0, 0, 255));
+        cube_int_sp.geometry_draw(&cube_int, &pos!(0, 0), 'X');
+
+        let mut oses = Sprite::new(100, 100);
+        oses.fill_color(Color::new(200, 200, 200));
+        oses.fill_char_with_f(|x, y| if x == 50 || y == 50 { '=' } else { EMPTY_CHAR });
+
+        let mut screen = system::GuiTerminal::new(100, 100, system::GuiConfig::default());
+
+        screen.blit(&oses, &pos!(0, 0));
+        screen.blit(&cubes_sp, &pos!(50, 50));
+        screen.blit(&cube_int_sp, &pos!(50, 50));
+
+        screen.render();
+
+        loop {
+            let _ = screen.poll_events();
+            screen.render();
+            std::thread::sleep(std::time::Duration::from_millis(10));
+            if !screen.is_open() {
+                break;
+            }
         }
     }
 }
