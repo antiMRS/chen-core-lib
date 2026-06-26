@@ -13,8 +13,6 @@ pub struct GuiConfig {
     pub font: Box<dyn UnicodeFonts>,
 }
 
-impl GuiConfig {}
-
 impl Default for GuiConfig {
     fn default() -> Self {
         Self {
@@ -31,8 +29,11 @@ pub struct GuiTerminal {
     window: Window,
     sprite: Sprite,
     scale: usize,
+    offset_x: usize,
+    offset_y: usize,
     pixel_buffer: Vec<u32>,
     need_redraw: bool,
+    current_win_size: (usize, usize), // отслеживаем изменение размера
     pub config: GuiConfig,
 }
 
@@ -47,7 +48,7 @@ impl GuiTerminal {
             win_w,
             win_h,
             WindowOptions {
-                resize: false,
+                resize: true,
                 scale: minifb::Scale::X1,
                 ..WindowOptions::default()
             },
@@ -57,15 +58,17 @@ impl GuiTerminal {
         window.set_target_fps(60);
 
         let sprite = Sprite::new(cols, rows);
-
         let pixel_buffer = vec![0u32; win_w * win_h];
 
         GuiTerminal {
             window,
             sprite,
             scale,
+            offset_x: 0,
+            offset_y: 0,
             pixel_buffer,
             need_redraw: true,
+            current_win_size: (win_w, win_h),
             config,
         }
     }
@@ -76,6 +79,8 @@ impl GuiTerminal {
 
     pub fn new_scale(&mut self, new: usize) {
         self.scale = new;
+        self.current_win_size = (0, 0);
+        self.need_redraw = true;
     }
 
     pub fn sprite(&self) -> &Sprite {
@@ -102,6 +107,28 @@ impl GuiTerminal {
     }
 
     pub fn render(&mut self) {
+        let (win_w, win_h) = self.window.get_size();
+
+        if win_w != self.current_win_size.0 || win_h != self.current_win_size.1 {
+            self.current_win_size = (win_w, win_h);
+
+            let cols = self.sprite.size().w() as usize;
+            let rows = self.sprite.size().h() as usize;
+
+            let max_scale_x = win_w / (cols * CHAR_WIDTH);
+            let max_scale_y = win_h / (rows * CHAR_HEIGHT);
+            let new_scale = std::cmp::max(1, std::cmp::min(max_scale_x, max_scale_y));
+            self.scale = new_scale;
+
+            let total_w = cols * CHAR_WIDTH * self.scale;
+            let total_h = rows * CHAR_HEIGHT * self.scale;
+            self.offset_x = (win_w.saturating_sub(total_w)) / 2;
+            self.offset_y = (win_h.saturating_sub(total_h)) / 2;
+
+            self.pixel_buffer = vec![0u32; win_w * win_h];
+            self.need_redraw = true;
+        }
+
         if !self.need_redraw {
             return;
         }
@@ -109,8 +136,8 @@ impl GuiTerminal {
         let w = self.sprite.size().w() as usize;
         let h = self.sprite.size().h() as usize;
         let scale = self.scale;
-        let win_w = self.window.get_size().0;
-        let win_h = self.window.get_size().1;
+        let offset_x = self.offset_x;
+        let offset_y = self.offset_y;
 
         let font = &self.config.font;
 
@@ -120,7 +147,6 @@ impl GuiTerminal {
             for x in 0..w {
                 let chr = self.sprite.get_char(x, h - y - 1);
 
-                // Цвета
                 #[cfg(feature = "colored")]
                 let fg = self.sprite.get_color(x, h - y - 1);
                 #[cfg(not(feature = "colored"))]
@@ -136,13 +162,13 @@ impl GuiTerminal {
                         let color = if pixel_on { fg } else { bg };
                         let argb = color_to_u32(color);
 
-                        let px = (x * CHAR_WIDTH + col) * scale;
-                        let py = (y * CHAR_HEIGHT + row) * scale;
+                        let base_x = offset_x + (x * CHAR_WIDTH + col) * scale;
+                        let base_y = offset_y + (y * CHAR_HEIGHT + row) * scale;
 
                         for dy in 0..scale {
                             for dx in 0..scale {
-                                let final_x = px + dx;
-                                let final_y = py + dy;
+                                let final_x = base_x + dx;
+                                let final_y = base_y + dy;
                                 if final_x < win_w && final_y < win_h {
                                     let idx = final_y * win_w + final_x;
                                     self.pixel_buffer[idx] = argb;
@@ -284,5 +310,5 @@ fn color_to_u32(color: Color) -> u32 {
 
 #[cfg(not(feature = "colored"))]
 fn color_to_u32(_: Color) -> u32 {
-    0xFFFFFFFF // белый
+    0xFFFFFFFF
 }
