@@ -37,7 +37,12 @@ mod test {
     use crate::*;
     #[test]
     fn main_test() {
-        let screen = screen::Terminal::new("Test terminal", 100, 100);
+        let mut screen = screen::Terminal::new("Test terminal", 20, 20);
+        let mut sp = Sprite::new(50, 50);
+        sp.fill('X');
+        //sp.fill_color(Color::red());
+        //sp.fill_style(CharStyle::Underline);
+        screen.blit(&sp, &pos!(0, 0));
         screen.render();
     }
 

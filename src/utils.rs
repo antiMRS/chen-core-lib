@@ -8,7 +8,7 @@ pub fn char_test() -> Sprite {
         let (x, y) = Position::from_flattened(sp.size(), xy);
         sp.draw(ch, x, y);
     }
-
+    #[cfg(feature = "colored")]
     sp.fill_color(Color::new(255, 255, 255));
 
     sp

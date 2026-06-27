@@ -60,6 +60,14 @@ impl Color {
         Self::new(0, 0, 255)
     }
 
+    pub const fn white() -> Self {
+        Self::new(255, 255, 255)
+    }
+
+    pub const fn black() -> Self {
+        Self::new(0, 0, 0)
+    }
+
     pub fn r(&self) -> u8 {
         self.rgb[0]
     }
@@ -196,7 +204,7 @@ impl Sprite {
             .draw(&self.size, &sprite.colors, &sprite.size, x, y);
         #[cfg(feature = "styled")]
         self.styles
-            .draw(&self.size, &sprite.styles, &sprite.size, pos);
+            .draw(&self.size, &sprite.styles, &sprite.size, x, y);
     }
 
     ///
@@ -330,8 +338,12 @@ impl Sprite {
 
 #[cfg(feature = "styled")]
 impl Sprite {
-    pub fn get_style(&self, pos: &Position) -> CharStyle {
-        self.styles.get(&self.size, pos)
+    pub fn get_style(&self, x: usize, y: usize) -> CharStyle {
+        self.styles.get(&self.size, x, y)
+    }
+
+    pub fn fill_style(&mut self, style: CharStyle) {
+        self.styles.fill(&self.size, style)
     }
 }
 
