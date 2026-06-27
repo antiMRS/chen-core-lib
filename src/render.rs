@@ -162,8 +162,8 @@ impl Sprite {
                         | (color.g() as u32) << 2
                         | (color.b() as u32);
 
-                    let base_x = (x * 8 + col);
-                    let base_y = (y * 8 + row);
+                    let base_x = x * 8 + col;
+                    let base_y = y * 8 + row;
 
                     if base_x < sizeu.0 && base_y < sizeu.1 {
                         let idx = base_y * sizeu.0 + base_x;

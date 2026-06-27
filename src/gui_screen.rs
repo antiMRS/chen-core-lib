@@ -102,7 +102,6 @@ impl GuiTerminal {
     pub fn blit(&mut self, sprite: &Sprite, pos: &Position) {
         self.sprite.blit_sprite(sprite, pos);
 
-        let font = &self.config.font;
         let dst_x = (pos.x() * CHAR_WIDTH as i64) as usize;
         let dst_y = (pos.y() * CHAR_HEIGHT as i64) as usize;
 
