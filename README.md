@@ -7,9 +7,13 @@
 ## Version generation rule
 
 major change ------┑   ┍---- issue / bugfix
+
                    V   V
+                   
                    *0*.*1*.*0*
+                   
                      ^
+                     
                      ┕------ new features release
 
 ## Contributing
