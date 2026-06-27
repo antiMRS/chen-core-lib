@@ -6,7 +6,7 @@
 
 ## Version generation rule
 
-*0*.*1*.*1*
+**0**.**1**.**1**
 
 The number increases if:
 
