@@ -1,9 +1,10 @@
 use crate::{
-    builtins::{Color, EMPTY_CHAR, Position, Sprite},
+    builtins::{Color, EMPTY_CHAR, Position, Size, Sprite},
     event::{Event, KeyEvent},
 };
 use font8x8::{BASIC_FONTS, UnicodeFonts};
 use minifb::{Key, Window, WindowOptions};
+use std::collections::HashMap;
 
 const CHAR_WIDTH: usize = 8;
 const CHAR_HEIGHT: usize = 8;
@@ -32,8 +33,9 @@ pub struct GuiTerminal {
     offset_x: usize,
     offset_y: usize,
     pixel_buffer: Vec<u32>,
+    pixel_buffer_raw: PixelBuffer,
     need_redraw: bool,
-    current_win_size: (usize, usize), // отслеживаем изменение размера
+    current_win_size: (usize, usize),
     pub config: GuiConfig,
 }
 
@@ -59,6 +61,10 @@ impl GuiTerminal {
 
         let sprite = Sprite::new(cols, rows);
         let pixel_buffer = vec![0u32; win_w * win_h];
+        let raw_w = cols * CHAR_WIDTH;
+        let raw_h = rows * CHAR_HEIGHT;
+        let mut pixel_buffer_raw = PixelBuffer::new(raw_w, raw_h);
+        pixel_buffer_raw.fill(0xFF000000);
 
         GuiTerminal {
             window,
@@ -67,6 +73,7 @@ impl GuiTerminal {
             offset_x: 0,
             offset_y: 0,
             pixel_buffer,
+            pixel_buffer_raw,
             need_redraw: true,
             current_win_size: (win_w, win_h),
             config,
@@ -94,15 +101,89 @@ impl GuiTerminal {
 
     pub fn blit(&mut self, sprite: &Sprite, pos: &Position) {
         self.sprite.blit_sprite(sprite, pos);
+
+        let font = &self.config.font;
+        let dst_x = (pos.x() * CHAR_WIDTH as i64) as usize;
+        let dst_y = (pos.y() * CHAR_HEIGHT as i64) as usize;
+
+        let sp_w = sprite.size().w() as usize;
+        let sp_h = sprite.size().h() as usize;
+
+        let mut cache: HashMap<char, [u8; 8]> = HashMap::new();
+
+        for cy in 0..sp_h {
+            for cx in 0..sp_w {
+                let ch = sprite.get_char(cx, cy);
+                if ch == EMPTY_CHAR {
+                    continue;
+                }
+                #[cfg(feature = "colored")]
+                let fg = sprite.get_color(cx, cy);
+                #[cfg(not(feature = "colored"))]
+                let fg = Color::new(255, 255, 255);
+                let bg = Color::new(0, 0, 0);
+
+                let glyph = if cache.contains_key(&ch) {
+                    *cache.get(&ch).unwrap()
+                } else {
+                    let gl = self
+                        .config
+                        .font
+                        .get(ch)
+                        .unwrap_or(self.config.font.get('?').unwrap());
+                    cache.insert(ch, gl);
+                    gl
+                };
+
+                let pixel_x = dst_x + cx * CHAR_WIDTH;
+                let pixel_y = self.pixel_buffer_raw.height() - (dst_y + cy * CHAR_HEIGHT) - 1;
+
+                Self::render_glyph_to_buffer(
+                    glyph,
+                    fg,
+                    bg,
+                    &mut self.pixel_buffer_raw,
+                    pixel_x,
+                    pixel_y,
+                );
+            }
+        }
+
+        self.need_redraw = true;
+    }
+
+    pub fn blit_buffer(&mut self, buffer: &PixelBuffer, x: usize, y: usize) {
+        self.pixel_buffer_raw.blit(buffer, x, y);
         self.need_redraw = true;
     }
 
     pub fn clear(&mut self) {
         self.sprite.fill(EMPTY_CHAR);
         #[cfg(feature = "colored")]
-        {
-            self.sprite.fill_color(Color::default());
-        }
+        self.sprite.fill_color(Color::default());
+        self.pixel_buffer_raw.fill(0xFF000000);
+        self.need_redraw = true;
+    }
+
+    fn update_on_resize(&mut self) {
+        let (win_w, win_h) = self.window.get_size();
+
+        self.current_win_size = (win_w, win_h);
+
+        let cols = self.sprite.size().w() as usize;
+        let rows = self.sprite.size().h() as usize;
+
+        let max_scale_x = win_w / (cols * CHAR_WIDTH);
+        let max_scale_y = win_h / (rows * CHAR_HEIGHT);
+        let new_scale = std::cmp::max(1, std::cmp::min(max_scale_x, max_scale_y));
+        self.scale = new_scale;
+
+        let total_w = cols * CHAR_WIDTH * self.scale;
+        let total_h = rows * CHAR_HEIGHT * self.scale;
+        self.offset_x = (win_w.saturating_sub(total_w)) / 2;
+        self.offset_y = (win_h.saturating_sub(total_h)) / 2;
+
+        self.pixel_buffer = vec![0u32; win_w * win_h];
         self.need_redraw = true;
     }
 
@@ -110,71 +191,49 @@ impl GuiTerminal {
         let (win_w, win_h) = self.window.get_size();
 
         if win_w != self.current_win_size.0 || win_h != self.current_win_size.1 {
-            self.current_win_size = (win_w, win_h);
-
-            let cols = self.sprite.size().w() as usize;
-            let rows = self.sprite.size().h() as usize;
-
-            let max_scale_x = win_w / (cols * CHAR_WIDTH);
-            let max_scale_y = win_h / (rows * CHAR_HEIGHT);
-            let new_scale = std::cmp::max(1, std::cmp::min(max_scale_x, max_scale_y));
-            self.scale = new_scale;
-
-            let total_w = cols * CHAR_WIDTH * self.scale;
-            let total_h = rows * CHAR_HEIGHT * self.scale;
-            self.offset_x = (win_w.saturating_sub(total_w)) / 2;
-            self.offset_y = (win_h.saturating_sub(total_h)) / 2;
-
-            self.pixel_buffer = vec![0u32; win_w * win_h];
-            self.need_redraw = true;
+            self.update_on_resize();
         }
 
         if !self.need_redraw {
             return;
         }
 
-        let w = self.sprite.size().w() as usize;
-        let h = self.sprite.size().h() as usize;
+        let raw_w = self.pixel_buffer_raw.width();
+        let raw_h = self.pixel_buffer_raw.height();
         let scale = self.scale;
-        let offset_x = self.offset_x;
-        let offset_y = self.offset_y;
+        let off_x = self.offset_x;
+        let off_y = self.offset_y;
 
-        let font = &self.config.font;
+        if self.pixel_buffer.len() != win_w * win_h {
+            self.pixel_buffer = vec![0u32; win_w * win_h];
+        }
 
         self.pixel_buffer.fill(0xFF000000);
 
-        for y in 0..h {
-            for x in 0..w {
-                let chr = self.sprite.get_char(x, h - y - 1);
+        for y in 0..raw_h {
+            let dest_y_base = off_y + y * scale;
+            if dest_y_base >= win_h {
+                break;
+            }
+            for x in 0..raw_w {
+                let color = self.pixel_buffer_raw.buf[y * raw_w + x];
+                let dest_x_base = off_x + x * scale;
+                if dest_x_base >= win_w {
+                    break;
+                }
 
-                #[cfg(feature = "colored")]
-                let fg = self.sprite.get_color(x, h - y - 1);
-                #[cfg(not(feature = "colored"))]
-                let fg = Color::new(255, 255, 255);
-
-                let bg = Color::new(0, 0, 0);
-
-                let glyph = font.get(chr).unwrap_or_else(|| font.get('?').unwrap());
-
-                for (row, row_m) in glyph.iter().enumerate() {
-                    for col in 0..8 {
-                        let pixel_on = (row_m >> col) & 1 == 1;
-                        let color = if pixel_on { fg } else { bg };
-                        let argb = color_to_u32(color);
-
-                        let base_x = offset_x + (x * CHAR_WIDTH + col) * scale;
-                        let base_y = offset_y + (y * CHAR_HEIGHT + row) * scale;
-
-                        for dy in 0..scale {
-                            for dx in 0..scale {
-                                let final_x = base_x + dx;
-                                let final_y = base_y + dy;
-                                if final_x < win_w && final_y < win_h {
-                                    let idx = final_y * win_w + final_x;
-                                    self.pixel_buffer[idx] = argb;
-                                }
-                            }
+                for dy in 0..scale {
+                    let dest_y = dest_y_base + dy;
+                    if dest_y >= win_h {
+                        break;
+                    }
+                    let row_start = dest_y * win_w;
+                    for dx in 0..scale {
+                        let dest_x = dest_x_base + dx;
+                        if dest_x >= win_w {
+                            break;
                         }
+                        self.pixel_buffer[row_start + dest_x] = color;
                     }
                 }
             }
@@ -297,6 +356,35 @@ impl GuiTerminal {
             });
         }
         None
+    }
+
+    fn render_glyph_to_buffer(
+        glyph: [u8; 8],
+        fg: Color,
+        bg: Color,
+        dst: &mut PixelBuffer,
+        x: usize,
+        y: usize,
+    ) {
+        let dst_w = dst.width();
+        let dst_h = dst.height();
+        for (row, row_m) in glyph.iter().enumerate() {
+            let pixel_y = y + row;
+            if pixel_y >= dst_h {
+                continue;
+            }
+            for col in 0..8 {
+                let pixel_x = x + col;
+                if pixel_x >= dst_w {
+                    continue;
+                }
+                let pixel_on = (row_m >> col) & 1 == 1;
+                let color = if pixel_on { fg } else { bg };
+                let argb = color_to_u32(color);
+                let idx = pixel_y * dst_w + pixel_x;
+                dst.buf[idx] = argb;
+            }
+        }
     }
 }
 
