@@ -1,6 +1,27 @@
 # ruby_core_lib
 
-**ruby_core_lib** a set of functions for creating small and stylized games, both in the console and in a separate window. Provides the minimum necessary functionality.
+
+---
+
+## Version generation rule
+
+_0_._1_._1_
+
+The number increases if:
+
+First number - major change
+
+Second number - release
+
+Third number - bugfix / issue
+
+---
+
+## Contributing
+
+Delete the file TODO.md in the master branch, since this is a finished release and the tasks in it don't look good.
+
+All major changes need to be made in the dev branch.
 
 ---
 
