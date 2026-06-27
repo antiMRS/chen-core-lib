@@ -3,6 +3,8 @@ use crate::builtins::{Dims, Geometry, Position, Size};
 pub const EMPTY_CHAR: char = ' ';
 
 use crate::buffer::Buffer;
+#[cfg(feature = "use_gui")]
+use crate::system::PixelBuffer;
 
 #[derive(Debug)]
 pub struct UDim(Dims<f64, 2>);
@@ -124,6 +126,47 @@ pub struct Sprite {
     colors: Buffer<Color>,
     #[cfg(feature = "styled")]
     styles: Buffer<CharStyle>,
+}
+
+#[cfg(feature = "use_gui")]
+impl Sprite {
+    pub fn buffer(&self, font: &dyn font8x8::UnicodeFonts) -> PixelBuffer {
+        let mut buf = PixelBuffer::new(self.size.w() as usize * 8, self.size.h() as usize * 8);
+        let sizeu = ((self.size.w() * 8) as usize, (self.size.h() * 8) as usize);
+        for xy in 0..self.chars.len() {
+            let (x, y) = Position::from_flattened(&self.size, xy);
+            let chr = self.chars.get(&self.size, x, y);
+            #[cfg(feature = "colored")]
+            let color = self.colors.get(&self.size, x, y);
+            #[cfg(not(feature = "colored"))]
+            let color = Color::new(255, 255, 255);
+
+            let bg = Color::new(0, 0, 0);
+
+            let glyph = font.get(chr).unwrap_or(font.get('?').unwrap());
+
+            for (row, row_m) in glyph.iter().enumerate() {
+                for col in 0..8 {
+                    let pixel_on = (row_m >> col) & 1 == 1;
+                    let color = if pixel_on { color } else { bg };
+                    let argb = 0xFF000000
+                        | (color.r() as u32) << 4
+                        | (color.g() as u32) << 2
+                        | (color.b() as u32);
+
+                    let base_x = (x * 8 + col);
+                    let base_y = (y * 8 + row);
+
+                    if base_x < sizeu.0 && base_y < sizeu.1 {
+                        let idx = base_y * sizeu.0 + base_x;
+                        buf[idx] = argb;
+                    }
+                }
+            }
+        }
+
+        buf
+    }
 }
 
 impl Sprite {

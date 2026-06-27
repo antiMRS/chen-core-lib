@@ -19,6 +19,8 @@ pub mod system {
     pub use crate::gui_screen::GuiConfig;
     #[cfg(feature = "use_gui")]
     pub use crate::gui_screen::GuiTerminal;
+    #[cfg(feature = "use_gui")]
+    pub use crate::gui_screen::PixelBuffer;
     pub use crate::screen::Terminal;
 }
 
@@ -117,6 +119,8 @@ mod test {
         }
     }
 
+    #[cfg(feature = "use_gui")]
+    #[test]
     fn intersection_test() {
         let cube1_geo = Geometry::new(vec![pos!(0, 0), pos!(0, 5), pos!(8, 5), pos!(8, 0)]); // rectangle 8 x 5
         let cube2_geo = Geometry::new_square(5); // rectangle 5 x 5
@@ -159,5 +163,13 @@ mod test {
                 break;
             }
         }
+    }
+
+    #[cfg(feature = "use_gui")]
+    #[test]
+    fn pixel_buffer() {
+        let sp = crate::utils::char_test();
+        let buf = sp.buffer(&font8x8::BASIC_FONTS);
+        println!("{:?}", buf)
     }
 }
