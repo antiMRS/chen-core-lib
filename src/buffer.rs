@@ -14,6 +14,10 @@ impl<T: Default + Copy> Buffer<T> {
         }
     }
 
+    pub fn len(&self) -> usize {
+        self.buf.len()
+    }
+
     pub fn new_filled(w: usize, h: usize, what: T) -> Self {
         Self {
             buf: vec![what; w * h].into_boxed_slice(),
