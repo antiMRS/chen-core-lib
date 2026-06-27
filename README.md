@@ -1,5 +1,6 @@
-# ruby_core_lib
+# *CH*aracter *EN*gine core lib
 
+**chen_core_lib** a set of functions for creating small and stylized games, both in the console and in a separate window. Provides the minimum necessary functionality.
 
 ---
 
@@ -31,13 +32,20 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-ruby_core_lib = { git = "..." }
+chen_core_lib = { git = "https://github.com/antiMRS/chen-core-lib/" }
 ```
 
 Enable desired features:
 
 ```toml
-ruby_core_lib = { version = "...", features = ["colored", "styled", "use_gui"] }
+chen_core_lib = { features = ["colored", "styled", "use_gui"] }
+```
+
+Both can be combined
+
+```toml
+[dependencies]
+chen_core_lib = { git = "https://github.com/antiMRS/chen-core-lib/", features = ["colored", "styled", "use_gui"] }
 ```
 
 Available features:
@@ -56,8 +64,8 @@ Available features:
 A minimal example that creates a window and displays a sprite:
 
 ```rust
-use ruby_core_lib::builtins::*;
-use ruby_core_lib::system::{GuiTerminal, GuiConfig};
+use chen_core_lib::builtins::*;
+use chen_core_lib::system::{GuiTerminal, GuiConfig};
 
 fn main() {
     let mut screen = GuiTerminal::new(40, 20, GuiConfig::default());
@@ -81,7 +89,7 @@ fn main() {
 For terminal output, use `Terminal` instead:
 
 ```rust
-use ruby_core_lib::system::Terminal;
+use chen_core_lib::system::Terminal;
 
 let mut term = Terminal::new("My Game", 50, 50);
 term.blit(&sprite, &Position::new(0, 0));

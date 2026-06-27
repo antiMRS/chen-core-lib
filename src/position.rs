@@ -77,7 +77,7 @@ impl Position {
     ///
     /// # Example
     /// ```
-    /// # use ruby_core_lib::builtins::Position;
+    /// # use chen_core_lib::builtins::Position;
     /// let pos = Position::new(1, 2);
     /// ```
     ///
@@ -98,7 +98,7 @@ impl Position {
     ///
     /// # Example
     /// ```
-    /// # use ruby_core_lib::builtins::Position;
+    /// # use chen_core_lib::builtins::Position;
     /// let pos = Position::new(2, 3);
     /// assert_eq!(pos.flat_mul(2), Position::new(4, 6))
     ///
@@ -157,7 +157,7 @@ impl Position {
     ///
     /// # Example
     /// ```
-    /// # use ruby_core_lib::builtins::Position;
+    /// # use chen_core_lib::builtins::Position;
     ///
     /// let pos1 = Position::new(2, 1);
     /// let pos2 = Position::new(5, 2);
@@ -174,7 +174,7 @@ impl Position {
     ///
     /// # Example
     /// ```
-    /// # use ruby_core_lib::builtins::Position;
+    /// # use chen_core_lib::builtins::Position;
     ///
     /// let pos1 = Position::new(2, 1);
     /// let pos2 = Position::new(5, 2);
@@ -296,7 +296,7 @@ impl Size {
     /// # Example
     ///
     /// ```
-    /// # use ruby_core_lib::builtins::Size;
+    /// # use chen_core_lib::builtins::Size;
     /// let size = Size::new(10, 10);
     /// ```
     ///
@@ -317,7 +317,7 @@ impl Size {
     ///
     /// # Example
     /// ```
-    /// # use ruby_core_lib::builtins::Size;
+    /// # use chen_core_lib::builtins::Size;
     /// let size = Size::new(4, 5);
     /// assert_eq!(size.flat_mul(3), Size::new(12, 15));
     /// ```
@@ -362,7 +362,7 @@ impl Geometry {
     ///
     /// # Example
     /// ```
-    /// # use ruby_core_lib::builtins::{Geometry, Position};
+    /// # use chen_core_lib::builtins::{Geometry, Position};
     /// let geo = Geometry::new(vec![Position::new(0, 0), Position::new(0, 6), Position::new(5, 6), Position::new(5, 0)]);
     /// ```
     /// This creates a geometry in the form of a 5 by 6 rectangle.
@@ -392,7 +392,7 @@ impl Geometry {
     ///
     /// # Example
     /// ```
-    /// # use ruby_core_lib::builtins::{Geometry, Position};
+    /// # use chen_core_lib::builtins::{Geometry, Position};
     /// assert_eq!(Geometry::empty(), Geometry::new(vec![]));
     /// ```
     ///

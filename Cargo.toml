@@ -1,9 +1,9 @@
 [package]
-name = "ruby_core_lib"
+name = "chen_core_lib"
 version = "0.1.0"
 edition = "2024"
 description = "Assets for terminal like games."
-repositiory = "https://github.com/antiMRS/RubyCore"
+repositiory = "https://github.com/antiMRS/chenCore"
 authors = ["antiMRS"]
 
 [dependencies]

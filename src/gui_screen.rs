@@ -17,7 +17,7 @@ pub struct GuiConfig {
 impl Default for GuiConfig {
     fn default() -> Self {
         Self {
-            title: "RubyCore Screen",
+            title: "ChenCore Screen",
             font: Box::new(BASIC_FONTS),
         }
     }
