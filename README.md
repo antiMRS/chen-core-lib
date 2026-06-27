@@ -1,4 +1,4 @@
-# *CH*aracter *EN*gine core lib
+# **CH**aracter **EN**gine core lib
 
 **chen_core_lib** a set of functions for creating small and stylized games, both in the console and in a separate window. Provides the minimum necessary functionality.
 
