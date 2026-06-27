@@ -1,5 +1,6 @@
 // terminal.rs
 use crate::builtins::{Color, EMPTY_CHAR, Position, Sprite};
+use crate::event::Event;
 
 use std::io::{self, Write};
 use std::process::Command;
@@ -41,8 +42,7 @@ impl Terminal {
     /// Skips cells with EMPTY_CHAR.
     ///
     pub fn blit(&mut self, sprite: &Sprite, pos: &Position) {
-        self.buf
-            .draw_sprite(sprite, pos.x() as usize, pos.y() as usize);
+        self.buf.blit_sprite(sprite, pos);
     }
 
     ///
@@ -123,5 +123,13 @@ impl Terminal {
         }
 
         let _ = stdout.flush();
+    }
+
+    pub fn is_open(&self) -> bool {
+        true
+    }
+
+    pub fn poll_events(&self) -> Option<Event> {
+        None
     }
 }
