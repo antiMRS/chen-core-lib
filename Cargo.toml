@@ -7,7 +7,7 @@ repositiory = "https://github.com/antiMRS/chen-core-lib/"
 authors = ["antiMRS"]
 readme = "README.md"
 license = "MIT"
-license-file = "LICENSE"
+license-file = "LICENCE"
 keywords = ["gamedev", "terminal", "graphics", "windows", "linux"]
 categories = ["game-development"]
 
