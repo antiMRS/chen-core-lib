@@ -26,20 +26,6 @@ All major changes need to be made in the dev branch.
 
 ---
 
-## Version generation rule
-
-major change ------┑   ┍---- issue / bugfix
-
-                   V   V
-                   
-                   *0*.*1*.*0*
-                   
-                     ^
-                     
-                     ┕------ new features release
-
-## Contributing
-
 ## Installation
 
 Add this to your `Cargo.toml`:
