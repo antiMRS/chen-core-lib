@@ -2,7 +2,8 @@ use crate::{
     builtins::{Color, EMPTY_CHAR, Position, Size, Sprite},
     event::{Event, KeyEvent},
 };
-use font8x8::{BASIC_FONTS, UnicodeFonts};
+//use font8x8::{BASIC_FONTS, UnicodeFonts};
+use chen_core_fonts::{BasicFont, Font};
 use minifb::{Key, Window, WindowOptions};
 use std::collections::HashMap;
 
@@ -11,14 +12,14 @@ const CHAR_HEIGHT: usize = 8;
 
 pub struct GuiConfig {
     pub title: &'static str,
-    pub font: Box<dyn UnicodeFonts>,
+    pub font: Box<dyn Font>,
 }
 
 impl Default for GuiConfig {
     fn default() -> Self {
         Self {
             title: "ChenCore Screen",
-            font: Box::new(BASIC_FONTS),
+            font: Box::new(BasicFont::new()),
         }
     }
 }

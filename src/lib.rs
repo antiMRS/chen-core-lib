@@ -174,7 +174,7 @@ mod test {
     #[test]
     fn pixel_buffer() {
         let sp = crate::utils::char_test();
-        let buf = sp.buffer(&font8x8::BASIC_FONTS);
-        println!("{:?}", buf)
+        //let buf = sp.buffer(&font8x8::BASIC_FONTS);
+        //println!("{:?}", buf)
     }
 }

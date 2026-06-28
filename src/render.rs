@@ -5,6 +5,8 @@ pub const EMPTY_CHAR: char = ' ';
 use crate::buffer::Buffer;
 #[cfg(feature = "use_gui")]
 use crate::system::PixelBuffer;
+#[cfg(feature = "use_gui")]
+use chen_core_fonts::Font;
 
 #[derive(Debug)]
 pub struct UDim(Dims<f64, 2>);
@@ -138,7 +140,7 @@ pub struct Sprite {
 
 #[cfg(feature = "use_gui")]
 impl Sprite {
-    pub fn buffer(&self, font: &dyn font8x8::UnicodeFonts) -> PixelBuffer {
+    pub fn buffer(&self, font: &dyn Font) -> PixelBuffer {
         let mut buf = PixelBuffer::new(self.size.w() as usize * 8, self.size.h() as usize * 8);
         let sizeu = ((self.size.w() * 8) as usize, (self.size.h() * 8) as usize);
         for xy in 0..self.chars.len() {
