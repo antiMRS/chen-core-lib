@@ -8,10 +8,10 @@ authors = ["antiMRS"]
 
 [dependencies]
 num-traits = "0.2.19"
+chen_core_fonts = { path ="crates/chen_core_fonts" }
 
 [target.'cfg(windows)'.dependencies]
 minifb = "0.28.0"
-font8x8 = "0.3.1"
 
 [features]
 default = ["use_gui", "colored", "terminal_color_rgb"]
