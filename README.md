@@ -1,6 +1,4 @@
 # **CH**aracter **EN**gine core lib
-
-[![Build Status](https://github.com/RustPython/RustPython/workflows/CI/badge.svg)](https://github.com/RustPython/RustPython/actions?query=workflow%3ACI)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Contributors](https://img.shields.io/github/contributors/antiMRS/chen_core_lib.svg)](https://github.com/antiMRS/chen_core_lib/graphs/contributors)
 [![docs.rs](https://docs.rs/chen_core_lib/badge.svg)](https://docs.rs/chen_core_lib/)
