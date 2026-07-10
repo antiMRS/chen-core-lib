@@ -38,48 +38,135 @@ impl Clone for UDim {
     }
 }
 
+///
+/// Struct for coding rgb color
+///
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct Color {
     rgb: Dims<u8, 3>,
 }
 
 impl Color {
+    ///
+    /// Creates new color
+    ///
     pub const fn new(r: u8, g: u8, b: u8) -> Self {
         Self {
             rgb: Dims::new([r, g, b]),
         }
     }
 
+    ///
+    /// Creates red color
+    ///
+    /// # Example
+    /// ```
+    /// # use chen_core_lib::builtins::Color;
+    /// let color_red = Color::red();
+    /// assert_eq!(color_red, Color::new(255, 0, 0));
+    /// ```
+    ///
     pub const fn red() -> Self {
         Self::new(255, 0, 0)
     }
-
+    ///
+    /// Creates green color
+    ///
+    /// # Example
+    /// ```
+    /// # use chen_core_lib::builtins::Color;
+    /// let color_green = Color::green();
+    /// assert_eq!(color_green, Color::new(0, 255, 0));
+    /// ```
+    ///
     pub const fn green() -> Self {
         Self::new(0, 255, 0)
     }
-
+    ///
+    /// Creates blue color
+    ///
+    /// # Example
+    /// ```
+    /// # use chen_core_lib::builtins::Color;
+    /// let color_blue = Color::blue();
+    /// assert_eq!(color_blue, Color::new(0, 0, 255));
+    /// ```
+    ///
     pub const fn blue() -> Self {
         Self::new(0, 0, 255)
     }
-
+    ///
+    /// Creates white color
+    ///
+    /// # Example
+    /// ```
+    /// # use chen_core_lib::builtins::Color;
+    /// let color_white = Color::white();
+    /// assert_eq!(color_white, Color::new(255, 255, 255));
+    /// ```
+    ///
     pub const fn white() -> Self {
         Self::new(255, 255, 255)
     }
-
+    ///
+    /// Creates black color
+    ///
+    /// # Example
+    /// ```
+    /// # use chen_core_lib::builtins::Color;
+    /// let color_black = Color::black();
+    /// assert_eq!(color_black, Color::new(0, 0, 0));
+    /// ```
+    ///
     pub const fn black() -> Self {
         Self::new(0, 0, 0)
     }
 
+    ///
+    /// Returns red parameter
+    ///
+    /// # Example
+    /// ```
+    /// # use chen_core_lib::builtins::{Color};
+    /// let color = Color::new(165, 56, 25);
+    /// assert_eq!(color.r(), 165);
+    /// ```
+    ///
     pub fn r(&self) -> u8 {
         self.rgb[0]
     }
+    ///
+    /// Returns green parameter
+    ///
+    /// # Example
+    /// ```
+    /// # use chen_core_lib::builtins::{Color};
+    /// let color = Color::new(165, 56, 25);
+    /// assert_eq!(color.g(), 56);
+    /// ```
+    ///
     pub fn g(&self) -> u8 {
         self.rgb[1]
     }
+    ///
+    /// Returns red parameter
+    ///
+    /// # Example
+    /// ```
+    /// # use chen_core_lib::builtins::{Color};
+    /// let color = Color::new(165, 56, 25);
+    /// assert_eq!(color.b(), 25);
+    /// ```
+    ///
     pub fn b(&self) -> u8 {
         self.rgb[2]
     }
 
+    ///
+    /// Return color in legacy format
+    ///
+    /// Needs in `terminal_color_legacy`
+    ///
     pub fn as_legacy(&self) -> u8 {
         match (self.r(), self.g(), self.b()) {
             (0, 0, 0) => 30,
@@ -93,6 +180,11 @@ impl Color {
             _ => 0,
         }
     }
+    ///
+    /// Return color in u8 format
+    ///
+    /// Needs in `terminal_color_cubes`
+    ///
     pub fn as_ascii(&self) -> u8 {
         let r_idx = (self.rgb[0] as u16 + 25) / 51;
         let g_idx = (self.rgb[1] as u16 + 25) / 51;
@@ -101,6 +193,9 @@ impl Color {
         16 + (r_idx * 36 + g_idx * 6 + b_idx) as u8
     }
 
+    ///
+    /// Adds one color to another
+    ///
     pub fn add_color(&mut self, other: Color) {
         self.rgb[0] = self.rgb[0].saturating_add(other.rgb[0]);
         self.rgb[1] = self.rgb[1].saturating_add(other.rgb[1]);
@@ -142,6 +237,11 @@ pub struct Sprite {
 
 #[cfg(feature = "use_gui")]
 impl Sprite {
+    ///
+    /// Returns pre-rendered pixel buffer for GuiTerminal
+    ///
+    /// see `system::GuiTerminal::blit_buffer`
+    ///
     pub fn buffer(&self, font: &dyn Font) -> PixelBuffer {
         let mut buf = PixelBuffer::new(self.size.w() as usize * 8, self.size.h() as usize * 8);
         let sizeu = ((self.size.w() * 8) as usize, (self.size.h() * 8) as usize);

@@ -1,3 +1,7 @@
+//! Assets for simple terminal games
+//!
+//!
+
 mod buffer;
 mod event;
 #[cfg(feature = "use_gui")]
@@ -8,11 +12,17 @@ mod screen;
 
 pub mod utils;
 
+///
+/// Basic struct
+///
 pub mod builtins {
     pub use crate::position::*;
     pub use crate::render::*;
 }
 
+///
+/// Visualization implementations
+///
 pub mod system {
     pub use crate::event::*;
     #[cfg(feature = "use_gui")]
@@ -22,6 +32,15 @@ pub mod system {
     #[cfg(feature = "use_gui")]
     pub use crate::gui_screen::PixelBuffer;
     pub use crate::screen::Terminal;
+}
+
+///
+/// Fonts for GuiTerminal
+///
+#[cfg(feature = "use_gui")]
+pub mod font {
+    pub use chen_core_fonts::BasicFont;
+    pub use chen_core_fonts::Font;
 }
 
 #[cfg(test)]

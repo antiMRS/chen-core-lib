@@ -202,6 +202,9 @@ impl std::cmp::PartialEq for Position {
     }
 }
 
+///
+/// Two dimensional vector
+///
 #[derive(Debug, Clone, Default, Copy)]
 pub struct Vector(Dims<i64, 2>);
 
@@ -210,6 +213,9 @@ impl Vector {
         Self(Dims::new([w, h]))
     }
 
+    ///
+    /// Anolog for `Vector::new(0,0)`
+    ///
     pub const fn zero() -> Self {
         Self(Dims::new([0, 0]))
     }
@@ -222,24 +228,41 @@ impl Vector {
         self.0[1]
     }
 
+    ///
+    /// Returns vector lenght in cube
+    ///
     pub fn plenght(&self) -> i64 {
         self.i().pow(2) + self.j().pow(2)
     }
 
+    ///
+    /// Returns vector lenght
+    ///
+    /// Analog for `Vector::plenght(vec).isqrt()`
+    ///
     pub fn lenght(&self) -> i64 {
         self.plenght().isqrt()
     }
 
+    ///
+    /// Multiplicates vector `i` and `j` for `w`
+    ///
     pub fn flat_mul(mut self, w: i64) -> Self {
         self.0[0] *= w;
         self.0[1] *= w;
         self
     }
 
+    ///
+    /// Returns dot product of two vectors
+    ///
     pub fn dot_product(&self, other: Vector) -> i64 {
         self.i() * other.i() + self.j() * other.j()
     }
 
+    ///
+    /// Returns vector between two points
+    ///
     pub fn between(from: &Position, to: &Position) -> Self {
         Self::new(to.x() - from.x(), to.y() - from.y())
     }
@@ -352,6 +375,9 @@ impl std::fmt::Display for Size {
     }
 }
 
+///
+/// Shows geometry of object
+///
 #[derive(Debug, Clone, PartialEq)]
 pub struct Geometry {
     dots: Box<[Position]>,
