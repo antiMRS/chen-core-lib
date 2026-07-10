@@ -5,7 +5,6 @@ use crate::{
 //use font8x8::{BASIC_FONTS, UnicodeFonts};
 use chen_core_fonts::{BasicFont, Font};
 use minifb::{Key, Window, WindowOptions};
-use std::collections::HashMap;
 
 const CHAR_WIDTH: usize = 8;
 const CHAR_HEIGHT: usize = 8;

@@ -1,7 +1,8 @@
-use fontdue::{Font as _Font, FontSettings, Metrics};
+use fontdue::Metrics;
 mod basic_font;
 
 type Glyph = [u8; 8];
+#[allow(unused)]
 const EMPTY_GLYPH: Glyph = [0; 8];
 
 pub trait Font {

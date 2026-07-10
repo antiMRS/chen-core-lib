@@ -13,6 +13,7 @@ categories = ["game-development"]
 [dependencies]
 num-traits = "0.2.19"
 minifb = "0.28.0"
+chen_core_fonts = { path="crates/chen_core_fonts" }
 
 [features]
 default = ["use_gui", "colored", "terminal_color_rgb", "background"]
