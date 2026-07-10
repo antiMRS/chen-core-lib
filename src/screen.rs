@@ -57,6 +57,8 @@ impl Terminal {
         self.buf.fill_color(Color::new(0, 0, 0));
         #[cfg(feature = "styled")]
         self.buf.fill_style(CharStyle::Normal);
+        #[cfg(feature = "background")]
+        self.buf.fill_bg(Color::new(0, 0, 0));
     }
 
     ///
@@ -76,80 +78,67 @@ impl Terminal {
         let h = self.buf.size().h() as usize;
         let mut stdout = io::stdout();
 
-        #[cfg(not(feature = "colored"))]
-        {
-            for y in 0..h {
-                for x in 0..w {
-                    #[cfg(feature = "styled")]
-                    let style = self.buf.get_style(x, h - y - 1);
-                    let ch = self.buf.get_char(x, h - y - 1);
-                    #[cfg(feature = "styled")]
-                    let _ = write!(stdout, "\x1b[{};1m{}", style.as_ascii(), ch);
-                    #[cfg(not(feature = "styled"))]
-                    let _ = write!(stdout, "{}", ch);
-                }
-                let _ = writeln!(stdout);
-            }
-        }
-
-        #[cfg(feature = "colored")]
         {
             for y in 0..h {
                 for x in 0..w {
                     let ch = self.buf.get_char(x, h - y - 1);
+                    #[cfg(feature = "colored")]
                     let color = self.buf.get_color(x, h - y - 1);
+                    #[cfg(all(feature = "background", feature = "colored"))]
+                    let bg = self.buf.get_bg_color(x, h - y - 1);
                     #[cfg(feature = "styled")]
                     let style = self.buf.get_style(x, h - y - 1);
 
-                    #[cfg(feature = "terminal_color_rgb")]
+                    #[cfg(any(feature = "styled", feature = "colored", feature = "background"))]
+                    let _ = write!(stdout, "\x1b[0m");
+
+                    // writing style
+                    #[cfg(feature = "styled")]
+                    let _ = write!(stdout, "\x1b[{}m", style.as_ascii());
+
+                    // writing background
+                    #[cfg(all(feature = "background", feature = "colored"))]
                     {
-                        #[cfg(feature = "styled")]
-                        let _ = write!(
-                            stdout,
-                            "\x1b[{};38;2;{};{};{}m{}\x1b[0m",
-                            style.as_ascii(),
-                            color.r(),
-                            color.g(),
-                            color.b(),
-                            ch
-                        );
-                        #[cfg(not(feature = "styled"))]
-                        let _ = write!(
-                            stdout,
-                            "\x1b[38;2;{};{};{}m{}\x1b[0m",
-                            color.r(),
-                            color.g(),
-                            color.b(),
-                            ch
-                        );
+                        #[cfg(feature = "terminal_color_rgb")]
+                        {
+                            let _ = write!(stdout, "\x1b[48;2;{};{};{}m", bg.r(), bg.g(), bg.b());
+                        }
+
+                        #[cfg(feature = "terminal_color_cubes")]
+                        {
+                            let _ = write!(stdout, "\x1b[48;5;{}m", bg.as_ascii());
+                        }
+
+                        #[cfg(feature = "terminal_color_legacy")]
+                        {
+                            let _ = write!(stdout, "\x1b[{}m", bg.as_legacy());
+                        }
                     }
 
-                    #[cfg(feature = "terminal_color_cubes")]
+                    #[cfg(feature = "colored")]
                     {
-                        #[cfg(feature = "styled")]
-                        let _ = write!(
-                            stdout,
-                            "\x1b[{};38;5;{}m{}\x1b[0m",
-                            style.as_ascii(),
-                            color.as_ascii(),
-                            ch
-                        );
-                        #[cfg(not(feature = "styled"))]
-                        let _ = write!(stdout, "\x1b[38;5;{}m{}\x1b[0m", color.as_ascii(), ch);
+                        #[cfg(feature = "terminal_color_rgb")]
+                        {
+                            let _ = write!(
+                                stdout,
+                                "\x1b[38;2;{};{};{}m",
+                                color.r(),
+                                color.g(),
+                                color.b()
+                            );
+                        }
+
+                        #[cfg(feature = "terminal_color_cubes")]
+                        {
+                            let _ = write!(stdout, "\x1b[38;5;{}m", color.as_ascii());
+                        }
+
+                        #[cfg(feature = "terminal_color_legacy")]
+                        {
+                            let _ = write!(stdout, "\x1b[{}m", color.as_legacy());
+                        }
                     }
-                    #[cfg(feature = "terminal_color_legacy")]
-                    {
-                        #[cfg(feature = "styled")]
-                        let _ = write!(
-                            stdout,
-                            "\x1b[{};{}m{}\x1b[0m",
-                            style.as_ascii(),
-                            color.as_legacy(),
-                            ch
-                        );
-                        #[cfg(not(feature = "styled"))]
-                        let _ = write!(stdout, "\x1b[{}m{}\x1b[0m", color.as_legacy(), ch);
-                    }
+                    let _ = write!(stdout, "{}", ch);
                 }
                 let _ = write!(stdout, "\n");
             }

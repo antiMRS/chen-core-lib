@@ -13,12 +13,12 @@ categories = ["game-development"]
 [dependencies]
 num-traits = "0.2.19"
 minifb = "0.28.0"
-font8x8 = "0.3.1"
 
 [features]
-default = ["use_gui", "colored", "terminal_color_rgb"]
+default = ["use_gui", "colored", "terminal_color_rgb", "background"]
 colored = []
 styled = []
+background = ["colored"]
 terminal_color_cubes = []
 terminal_color_rgb = []
 terminal_color_legacy = []

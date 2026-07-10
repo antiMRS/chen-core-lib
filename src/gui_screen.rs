@@ -2,7 +2,8 @@ use crate::{
     builtins::{Color, EMPTY_CHAR, Position, Size, Sprite},
     event::{Event, KeyEvent},
 };
-use font8x8::{BASIC_FONTS, UnicodeFonts};
+//use font8x8::{BASIC_FONTS, UnicodeFonts};
+use chen_core_fonts::{BasicFont, Font};
 use minifb::{Key, Window, WindowOptions};
 use std::collections::HashMap;
 
@@ -11,14 +12,14 @@ const CHAR_HEIGHT: usize = 8;
 
 pub struct GuiConfig {
     pub title: &'static str,
-    pub font: Box<dyn UnicodeFonts>,
+    pub font: Box<dyn Font>,
 }
 
 impl Default for GuiConfig {
     fn default() -> Self {
         Self {
             title: "ChenCore Screen",
-            font: Box::new(BASIC_FONTS),
+            font: Box::new(BasicFont::new()),
         }
     }
 }
@@ -108,8 +109,6 @@ impl GuiTerminal {
         let sp_w = sprite.size().w() as usize;
         let sp_h = sprite.size().h() as usize;
 
-        let mut cache: HashMap<char, [u8; 8]> = HashMap::new();
-
         for cy in 0..sp_h {
             for cx in 0..sp_w {
                 let ch = sprite.get_char(cx, cy);
@@ -120,19 +119,16 @@ impl GuiTerminal {
                 let fg = sprite.get_color(cx, cy);
                 #[cfg(not(feature = "colored"))]
                 let fg = Color::new(255, 255, 255);
+                #[cfg(feature = "background")]
+                let bg = sprite.get_bg_color(cx, cy);
+                #[cfg(not(feature = "background"))]
                 let bg = Color::new(0, 0, 0);
 
-                let glyph = if cache.contains_key(&ch) {
-                    *cache.get(&ch).unwrap()
-                } else {
-                    let gl = self
-                        .config
-                        .font
-                        .get(ch)
-                        .unwrap_or(self.config.font.get('?').unwrap());
-                    cache.insert(ch, gl);
-                    gl
-                };
+                let glyph = self
+                    .config
+                    .font
+                    .get(ch)
+                    .unwrap_or(self.config.font.get('?').unwrap());
 
                 let pixel_x = dst_x + cx * CHAR_WIDTH;
                 let pixel_y = self.pixel_buffer_raw.height() - (dst_y + cy * CHAR_HEIGHT) - 1;

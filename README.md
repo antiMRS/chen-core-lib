@@ -26,32 +26,11 @@ All major changes need to be made in the dev branch.
 
 ---
 
-## Installation
-
-Add this to your `Cargo.toml`:
-
-```toml
-[dependencies]
-chen_core_lib = { git = "https://github.com/antiMRS/chen-core-lib/" }
-```
-
-Enable desired features:
-
-```toml
-chen_core_lib = { features = ["colored", "styled", "use_gui"] }
-```
-
-Both can be combined
-
-```toml
-[dependencies]
-chen_core_lib = { git = "https://github.com/antiMRS/chen-core-lib/", features = ["colored", "styled", "use_gui"] }
-```
-
 Available features:
 
 - `colored` – enables symbol colors.
 - `styled` – enables bold/underline styles.
+- `baclground` - enables background.
 - `use_gui` – enables `GuiTerminal` and fonts.
 - `terminal_color_legacy` – use ANSI colors in terminal.
 - `terminal_color_cubes` – use 256‑color palette in terminal.
