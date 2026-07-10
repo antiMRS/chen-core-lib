@@ -139,11 +139,12 @@ impl Position {
     /// Adds vector to position
     ///
     /// # Example
-    /// ```no_run
-    ///
-    /// let pos = Position::new(2, 3);
+    /// ```
+    /// # use chen_core_lib::builtins::{Position, Vector};
+    /// let mut pos = Position::new(2, 3);
     /// let vec = Vector::new(2, 3);
-    /// assert_eq!(pos.add(vec), Position::new(4, 6))
+    /// pos.add(vec);
+    /// assert_eq!(pos, Position::new(4, 6))
     ///
     /// ```
     ///
@@ -607,6 +608,7 @@ impl Geometry {
         false
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn segments_intersect(
         x1: i64,
         y1: i64,
@@ -748,6 +750,7 @@ impl Geometry {
                 let current_inside = Self::is_left(p1, p2, current) >= 0;
 
                 if current_inside {
+                    #[allow(clippy::collapsible_if)]
                     if !prev_inside {
                         if let Some(intersect) =
                             Self::segment_intersection_point(&prev, current, p1, p2)
@@ -798,7 +801,7 @@ impl Geometry {
             - (a1.y() - b1.y()) as f64 * (b1.x() - b2.x()) as f64)
             / denom;
 
-        if t < 0.0 || t > 1.0 {
+        if !(0.0..1.0).contains(&t) {
             return None;
         }
 

@@ -197,7 +197,7 @@ impl Sprite {
         }
     }
 
-    pub fn new_from_text(text: &String) -> Self {
+    pub fn new_from_text(text: &str) -> Self {
         let mut sp = Self::new(text.len(), 0);
         for (x, ch) in text.chars().enumerate() {
             sp.set_char(ch, x, 0);
