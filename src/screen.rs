@@ -21,7 +21,7 @@ impl Terminal {
     ///
     /// # Example
     /// ```
-    /// # use rube_core_lib::system::Terminal;
+    /// # use chen_core_lib::system::Terminal;
     /// let term = Terminal::new("Test", 10, 10);
     /// ```
     ///
