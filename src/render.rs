@@ -197,6 +197,14 @@ impl Sprite {
         }
     }
 
+    pub fn new_from_text(text: &String) -> Self {
+        let mut sp = Self::new(text.len(), 0);
+        for (x, ch) in text.chars().enumerate() {
+            sp.set_char(ch, x, 0);
+        }
+        sp
+    }
+
     pub fn size(&self) -> &Size {
         &self.size
     }
@@ -266,7 +274,7 @@ impl Sprite {
     ///
     /// Sets char as position `(x, y)` = `char`
     ///
-    pub fn draw(&mut self, chr: char, x: usize, y: usize) {
+    pub fn set_char(&mut self, chr: char, x: usize, y: usize) {
         self.chars.set(&self.size, x, y, chr)
     }
 
