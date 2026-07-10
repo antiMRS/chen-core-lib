@@ -153,8 +153,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Install Rust toolchain
-      run: cargo install rustfmt
 
     - name: Check formatting
       run: cargo fmt -- --check
