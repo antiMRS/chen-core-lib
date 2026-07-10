@@ -2,6 +2,13 @@
 name = "chen_core_fonts"
 version = "1.0.0"
 edition = "2024"
+description = "Font system for https://github.com/antiMRS/chen-core-lib/"
+repository = "https://github.com/antiMRS/chen-core-lib/"
+authors = ["antiMRS"]
+license = "MIT"
+license-file = "../LICENCE"
+categories = ["game-development"]
+keywords = ["font"]
 
 [dependencies]
 fontdue = "0.9.3"
