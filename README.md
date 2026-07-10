@@ -4,6 +4,7 @@
 [![docs.rs](https://docs.rs/chen_core_lib/badge.svg)](https://docs.rs/chen_core_lib/)
 [![Crates.io](https://img.shields.io/crates/v/chen_core_lib)](https://crates.io/crates/chen_core_lib)
 [![dependency status](https://deps.rs/crate/chen_core_lib/0.1.1/status.svg)](https://deps.rs/crate/chen_core_lib/0.1.1)
+[![Crate size](https://img.shields.io/crates/size/chen_core_lib)]
 
 **chen_core_lib** a set of functions for creating small and stylized games, both in the console and in a separate window. Provides the minimum necessary functionality.
 
