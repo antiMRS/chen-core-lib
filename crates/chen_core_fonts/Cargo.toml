@@ -6,7 +6,7 @@ description = "Font system for https://github.com/antiMRS/chen-core-lib/"
 repository = "https://github.com/antiMRS/chen-core-lib/"
 authors = ["antiMRS"]
 license = "MIT"
-license-file = "../LICENCE"
+license-file = "LICENCE"
 categories = ["game-development"]
 keywords = ["font"]
 
