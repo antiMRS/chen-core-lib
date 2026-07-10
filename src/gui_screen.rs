@@ -103,14 +103,11 @@ impl GuiTerminal {
     pub fn blit(&mut self, sprite: &Sprite, pos: &Position) {
         self.sprite.blit_sprite(sprite, pos);
 
-        let font = &self.config.font;
         let dst_x = (pos.x() * CHAR_WIDTH as i64) as usize;
         let dst_y = (pos.y() * CHAR_HEIGHT as i64) as usize;
 
         let sp_w = sprite.size().w() as usize;
         let sp_h = sprite.size().h() as usize;
-
-        let mut cache: HashMap<char, [u8; 8]> = HashMap::new();
 
         for cy in 0..sp_h {
             for cx in 0..sp_w {
@@ -122,19 +119,16 @@ impl GuiTerminal {
                 let fg = sprite.get_color(cx, cy);
                 #[cfg(not(feature = "colored"))]
                 let fg = Color::new(255, 255, 255);
+                #[cfg(feature = "background")]
+                let bg = sprite.get_bg_color(cx, cy);
+                #[cfg(not(feature = "background"))]
                 let bg = Color::new(0, 0, 0);
 
-                let glyph = if cache.contains_key(&ch) {
-                    *cache.get(&ch).unwrap()
-                } else {
-                    let gl = self
-                        .config
-                        .font
-                        .get(ch)
-                        .unwrap_or(self.config.font.get('?').unwrap());
-                    cache.insert(ch, gl);
-                    gl
-                };
+                let glyph = self
+                    .config
+                    .font
+                    .get(ch)
+                    .unwrap_or(self.config.font.get('?').unwrap());
 
                 let pixel_x = dst_x + cx * CHAR_WIDTH;
                 let pixel_y = self.pixel_buffer_raw.height() - (dst_y + cy * CHAR_HEIGHT) - 1;
