@@ -153,13 +153,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Install Rust toolchain
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: ${{ matrix.rust }}
-        target: ${{ matrix.target }}
-        override: true
-        components: rustfmt, clippy
 
     - name: Check formatting
       run: cargo fmt -- --check
