@@ -134,6 +134,8 @@ pub struct Sprite {
     size: Size,
     #[cfg(feature = "colored")]
     colors: Buffer<Color>,
+    #[cfg(feature = "background")]
+    background: Buffer<Color>,
     #[cfg(feature = "styled")]
     styles: Buffer<CharStyle>,
 }
@@ -150,7 +152,9 @@ impl Sprite {
             let color = self.colors.get(&self.size, x, y);
             #[cfg(not(feature = "colored"))]
             let color = Color::new(255, 255, 255);
-
+            #[cfg(feature = "background")]
+            let bg = self.background.get(&self.size, x, y);
+            #[cfg(not(feature = "background"))]
             let bg = Color::new(0, 0, 0);
 
             let glyph = font.get(chr).unwrap_or(font.get('?').unwrap());
@@ -164,8 +168,8 @@ impl Sprite {
                         | (color.g() as u32) << 2
                         | (color.b() as u32);
 
-                    let base_x = (x * 8 + col);
-                    let base_y = (y * 8 + row);
+                    let base_x = x * 8 + col;
+                    let base_y = y * 8 + row;
 
                     if base_x < sizeu.0 && base_y < sizeu.1 {
                         let idx = base_y * sizeu.0 + base_x;
@@ -186,6 +190,8 @@ impl Sprite {
             size: Size::new(sx as u64, sy as u64),
             #[cfg(feature = "colored")]
             colors: Buffer::new(sx, sy),
+            #[cfg(feature = "background")]
+            background: Buffer::new(sx, sy),
             #[cfg(feature = "styled")]
             styles: Buffer::new(sx, sy),
         }
@@ -204,6 +210,9 @@ impl Sprite {
         #[cfg(feature = "colored")]
         self.colors
             .draw(&self.size, &sprite.colors, &sprite.size, x, y);
+        #[cfg(feature = "background")]
+        self.background
+            .draw(&self.size, &sprite.background, &sprite.size, x, y);
         #[cfg(feature = "styled")]
         self.styles
             .draw(&self.size, &sprite.styles, &sprite.size, x, y);
@@ -232,6 +241,10 @@ impl Sprite {
                 #[cfg(feature = "colored")]
                 {
                     self.colors.buf[target_idx] = sprite.colors.buf[src_idx];
+                }
+                #[cfg(feature = "background")]
+                {
+                    self.background.buf[target_idx] = sprite.background.buf[src_idx];
                 }
                 #[cfg(feature = "styled")]
                 {
@@ -294,13 +307,11 @@ impl Sprite {
         self.colors.get(&self.size, x, y)
     }
 
-    pub fn geometry_paint(&mut self, geom: &Geometry, pos: &Position, what: Color) {
-        self.colors.geometry_draw(&self.size, geom, pos, what);
-    }
-
-    pub fn geometry_paint_filled(&mut self, geom: &Geometry, pos: &Position, what: Color) {
-        self.colors
-            .geometry_draw_filled(&self.size, geom, pos, what);
+    ///
+    /// Sets color as position `(x, y)` = `color`
+    ///
+    pub fn set_color(&mut self, color: Color, x: usize, y: usize) {
+        self.colors.set(&self.size, x, y, color)
     }
 
     ///
@@ -310,11 +321,13 @@ impl Sprite {
         self.colors.fill(&self.size, color);
     }
 
-    ///
-    /// Sets color as position `(x, y)` = `color`
-    ///
-    pub fn paint(&mut self, color: Color, x: usize, y: usize) {
-        self.colors.set(&self.size, x, y, color)
+    pub fn geometry_paint(&mut self, geom: &Geometry, pos: &Position, what: Color) {
+        self.colors.geometry_draw(&self.size, geom, pos, what);
+    }
+
+    pub fn geometry_paint_filled(&mut self, geom: &Geometry, pos: &Position, what: Color) {
+        self.colors
+            .geometry_draw_filled(&self.size, geom, pos, what);
     }
 
     ///
@@ -333,6 +346,30 @@ impl Sprite {
         T: FnMut(u64, u64) -> Color,
     {
         self.colors.fill_with_f(&self.size, f);
+    }
+}
+
+// ====================== background =========================
+
+#[cfg(feature = "background")]
+impl Sprite {
+    pub fn get_bg_color(&self, x: usize, y: usize) -> Color {
+        self.background.get(&self.size, x, y)
+    }
+
+    pub fn set_bg_color(&mut self, color: Color, x: usize, y: usize) {
+        self.background.set(&self.size, x, y, color);
+    }
+
+    pub fn fill_bg(&mut self, color: Color) {
+        self.background.fill(&self.size, color)
+    }
+
+    pub fn fill_bg_color_with_f<T>(&mut self, f: T)
+    where
+        T: FnMut(u64, u64) -> Color,
+    {
+        self.background.fill_with_f(&self.size, f);
     }
 }
 
