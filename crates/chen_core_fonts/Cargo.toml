@@ -1,6 +1,6 @@
 [package]
 name = "chen_core_fonts"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2024"
 description = "Font system for https://github.com/antiMRS/chen-core-lib/"
 repository = "https://github.com/antiMRS/chen-core-lib/"

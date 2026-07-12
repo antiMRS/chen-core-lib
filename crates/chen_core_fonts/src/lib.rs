@@ -14,10 +14,8 @@ fn to_glyph(metrics: Metrics, bitmap: &[u8], waytru: u8) -> Glyph {
     for y in 0..metrics.height {
         for x in 0..metrics.width {
             let rest = bitmap[y * metrics.width + x];
-            if rest > waytru {
-                if x < 8 && y < 8 {
-                    glyph[y] = glyph[y] | 1 << x;
-                }
+            if rest > waytru && x < 8 && y < 8 {
+                glyph[y] |= 1 << x;
             }
         }
     }
@@ -59,7 +57,7 @@ pub fn align_left_bottom(glyph: [u8; 8]) -> [u8; 8] {
     let shift_left = 7 - left;
 
     for i in 0..=bottom {
-        let new_row = (glyph[i] << shift_left) & 0xFF;
+        let new_row = glyph[i] << shift_left;
         result[i + shift_down] = new_row;
     }
 

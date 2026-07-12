@@ -33,3 +33,12 @@ impl Font for BasicFont {
         }
     }
 }
+
+impl Default for BasicFont {
+    fn default() -> Self {
+        Self {
+            cache: RefCell::new(HashMap::new()),
+            font: _Font::from_bytes(Self::FONT, FontSettings::default()).unwrap(),
+        }
+    }
+}
