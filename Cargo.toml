@@ -12,8 +12,9 @@ categories = ["game-development"]
 
 [dependencies]
 num-traits = "0.2.19"
-minifb = "0.28.0"
-chen_core_fonts = { version = "1.0.0", path = "crates/chen_core_fonts" }
+minifb = {version = "0.28.0", optional = true}
+chen_core_fonts = { version = "1.0.0", path = "crates/chen_core_fonts", optional = true }
+
 
 [workspace]
 members = ["crates/chen_core_fonts"]
@@ -26,4 +27,4 @@ background = ["colored"]
 terminal_color_cubes = []
 terminal_color_rgb = []
 terminal_color_legacy = []
-use_gui = ["colored"]
+use_gui = ["colored", "dep:minifb", "dep:chen_core_fonts"]
