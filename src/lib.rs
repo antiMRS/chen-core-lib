@@ -2,12 +2,9 @@
 //!
 //!
 
-mod buffer;
 mod event;
 #[cfg(feature = "use_gui")]
 mod gui_screen;
-mod position;
-mod render;
 mod screen;
 
 pub mod utils;
@@ -15,10 +12,7 @@ pub mod utils;
 ///
 /// Basic struct
 ///
-pub mod builtins {
-    pub use crate::position::*;
-    pub use crate::render::*;
-}
+pub mod builtins;
 
 ///
 /// Visualization implementations
