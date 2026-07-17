@@ -20,7 +20,7 @@ chen_core_fonts = { version = "1.0.0", path = "crates/chen_core_fonts", optional
 members = ["crates/chen_core_fonts"]
 
 [features]
-default = ["use_gui", "colored", "terminal_color_rgb"]
+default = ["colored", "terminal_color_rgb"]
 colored = []
 styled = []
 background = ["colored"]
