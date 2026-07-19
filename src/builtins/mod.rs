@@ -1,5 +1,6 @@
 mod buffer;
 mod geometry;
+mod pixel_buffer;
 mod position;
 mod size;
 mod sprite;
@@ -62,11 +63,19 @@ pub(super) use buffer::Buffer;
 
 pub const EMPTY_CHAR: char = ' ';
 
+pub mod extend {
+    pub use super::position::Position;
+    pub use super::size::Size;
+    pub use super::vector::Vector;
+}
+
 pub use self::{
     geometry::Geometry,
-    position::Position,
-    size::Size,
+    pixel_buffer::PixelBuffer,
     sprite::{Color, Sprite},
     udim::UDim,
-    vector::Vector,
 };
+
+pub type Position = extend::Position<i64>;
+pub type Size = extend::Size<u64>;
+pub type Vector = extend::Vector<i64>;
