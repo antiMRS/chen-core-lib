@@ -1,73 +1,58 @@
+use num_traits::PrimInt;
+use num_traits::Signed;
+
 use super::Dims;
-use super::Position;
 
 ///
 /// Two dimensional vector
 ///
 #[derive(Debug, Clone, Default, Copy)]
-pub struct Vector(Dims<i64, 2>);
+pub struct Vector<T: PrimInt + Signed>(Dims<T, 2>);
 
-impl Vector {
-    pub const fn new(w: i64, h: i64) -> Self {
+impl<T: PrimInt + Signed> Vector<T> {
+    pub const fn new(w: T, h: T) -> Self {
         Self(Dims::new([w, h]))
     }
 
     ///
     /// Anolog for `Vector::new(0,0)`
     ///
-    pub const fn zero() -> Self {
-        Self(Dims::new([0, 0]))
+    pub fn zero() -> Self {
+        Self(Dims::new([T::zero(), T::zero()]))
     }
 
-    pub fn i(&self) -> i64 {
+    pub fn i(&self) -> T {
         self.0[0]
     }
 
-    pub fn j(&self) -> i64 {
+    pub fn j(&self) -> T {
         self.0[1]
     }
 
     ///
     /// Returns vector lenght in cube
     ///
-    pub fn plenght(&self) -> i64 {
+    pub fn plenght(&self) -> T {
         self.i().pow(2) + self.j().pow(2)
-    }
-
-    ///
-    /// Returns vector lenght
-    ///
-    /// Analog for `Vector::plenght(vec).isqrt()`
-    ///
-    pub fn lenght(&self) -> i64 {
-        self.plenght().isqrt()
-    }
-
-    ///
-    /// Multiplicates vector `i` and `j` for `w`
-    ///
-    pub fn flat_mul(mut self, w: i64) -> Self {
-        self.0[0] *= w;
-        self.0[1] *= w;
-        self
     }
 
     ///
     /// Returns dot product of two vectors
     ///
-    pub fn dot_product(&self, other: Vector) -> i64 {
+    pub fn dot_product(&self, other: Self) -> T {
         self.i() * other.i() + self.j() * other.j()
     }
 
-    ///
-    /// Returns vector between two points
-    ///
-    pub fn between(from: &Position, to: &Position) -> Self {
+    pub fn between(
+        &self,
+        from: super::extend::Position<T>,
+        to: super::extend::Position<T>,
+    ) -> Self {
         Self::new(to.x() - from.x(), to.y() - from.y())
     }
 }
 
-impl std::ops::Add for Vector {
+impl<T: PrimInt + Signed> std::ops::Add for Vector<T> {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
@@ -75,7 +60,7 @@ impl std::ops::Add for Vector {
     }
 }
 
-impl std::ops::Sub for Vector {
+impl<T: PrimInt + Signed> std::ops::Sub for Vector<T> {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
@@ -83,7 +68,7 @@ impl std::ops::Sub for Vector {
     }
 }
 
-impl std::ops::Neg for Vector {
+impl<T: PrimInt + Signed> std::ops::Neg for Vector<T> {
     type Output = Self;
 
     fn neg(self) -> Self::Output {
@@ -91,7 +76,7 @@ impl std::ops::Neg for Vector {
     }
 }
 
-impl std::fmt::Display for Vector {
+impl<T: PrimInt + Signed + std::fmt::Debug> std::fmt::Display for Vector<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Vector")
             .field("i", &self.i())
@@ -100,8 +85,14 @@ impl std::fmt::Display for Vector {
     }
 }
 
-impl std::cmp::PartialEq for Vector {
+impl<T: PrimInt + Signed> std::cmp::PartialEq for Vector<T> {
     fn eq(&self, other: &Self) -> bool {
         self.i() == other.i() && self.j() == other.j()
+    }
+}
+
+impl<T: PrimInt + Signed> Vector<T> {
+    pub fn from<O: PrimInt + Signed + Into<T>>(value: Vector<O>) -> Self {
+        Self::new(value.i().into(), value.j().into())
     }
 }

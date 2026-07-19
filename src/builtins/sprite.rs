@@ -1,6 +1,6 @@
 use super::{Buffer, Dims, EMPTY_CHAR, Geometry, Position, Size};
 #[cfg(feature = "use_gui")]
-use crate::{font::Font, system::PixelBuffer};
+use crate::{builtins::PixelBuffer, font::Font};
 
 ///
 /// Struct for coding rgb color
@@ -298,7 +298,7 @@ impl Sprite {
         let h = self.size.h() as i64;
 
         for i in 0..sprite.chars.buf.len() {
-            let local_pos = Position::from_flat(i as i64, &sprite.size);
+            let local_pos = Position::from_flat(&sprite.size, i as i64);
             let target_x = local_pos.x() + pos.x();
             let target_y = local_pos.y() + pos.y();
             if target_x < 0 || target_y < 0 || target_x >= w || target_y >= h {

@@ -322,7 +322,7 @@ impl Geometry {
             .dots
             .iter()
             .map(|p| {
-                let d = pivot.dist(p);
+                let d = pivot.pdist(p).isqrt() as u64;
                 if d > maxx {
                     maxx = d;
                 }

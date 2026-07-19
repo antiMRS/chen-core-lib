@@ -1,20 +1,26 @@
+use std::fmt::Debug;
+
 use super::Dims;
-use super::Size;
-use super::Vector;
+use num_traits::Signed;
+use num_traits::Unsigned;
 use num_traits::{Euclid, NumCast, PrimInt};
 
-///
-/// Stores position of point
-///
-#[derive(Debug, Clone, Default)]
-pub struct Position(Dims<i64, 2>);
+#[derive(Debug, Default, Clone)]
+pub struct Position<T: Signed + PrimInt>(Dims<T, 2>);
 
-impl Position {
-    pub fn flattened<T: PrimInt + NumCast>(size: &Size, x: T, y: T) -> T {
-        y * (T::from::<u64>(size.w()).unwrap()) + x
+impl<N: Signed + PrimInt> Position<N> {
+    pub fn flattened<T: PrimInt + NumCast, S: PrimInt + Unsigned>(
+        size: &super::extend::Size<S>,
+        x: T,
+        y: T,
+    ) -> T {
+        y * (T::from::<S>(size.w()).unwrap()) + x
     }
 
-    pub fn from_flattened<T: PrimInt + NumCast + Euclid>(size: &Size, xy: T) -> (T, T) {
+    pub fn from_flattened<T: PrimInt + NumCast + Euclid, S: PrimInt + Unsigned>(
+        size: &super::extend::Size<S>,
+        xy: T,
+    ) -> (T, T) {
         let width: T = T::from(size.w()).unwrap();
         assert!(width > T::zero(), "Width needs to be greater then 0");
         let x = xy.rem_euclid(&width);
@@ -23,7 +29,14 @@ impl Position {
     }
 }
 
-impl Position {
+impl<T: Signed + PrimInt + Euclid> Position<T> {
+    pub fn from_flat<S: PrimInt + Unsigned>(size: &super::extend::Size<S>, xy: T) -> Self {
+        let (x, y) = Self::from_flattened(size, xy);
+        Self::new(x, y)
+    }
+}
+
+impl<T: Signed + PrimInt> Position<T> {
     ///
     /// Creates new position by its coordinates
     ///
@@ -33,92 +46,23 @@ impl Position {
     /// let pos = Position::new(1, 2);
     /// ```
     ///
-    pub const fn new(x: i64, y: i64) -> Self {
+    pub const fn new(x: T, y: T) -> Self {
         Self(Dims::new([x, y]))
     }
 
-    pub fn x(&self) -> i64 {
+    pub fn x(&self) -> T {
         self.0[0]
     }
 
-    pub fn y(&self) -> i64 {
+    pub fn y(&self) -> T {
         self.0[1]
-    }
-
-    ///
-    /// Multiplies x and y by w
-    ///
-    /// # Example
-    /// ```
-    /// # use chen_core_lib::builtins::Position;
-    /// let pos = Position::new(2, 3);
-    /// assert_eq!(pos.flat_mul(2), Position::new(4, 6))
-    ///
-    /// ```
-    ///
-    pub fn flat_mul(mut self, w: i64) -> Self {
-        self.0[0] *= w;
-        self.0[1] *= w;
-        self
     }
 
     ///
     /// Returns tuple of (x, y)
     ///
-    pub fn as_tuple(self) -> (i64, i64) {
+    pub fn as_tuple(self) -> (T, T) {
         (self.x(), self.y())
-    }
-
-    ///
-    /// Returns pos in flat to use in indexing
-    ///
-    pub fn flat(&self, size: &Size) -> i64 {
-        self.y() * (size.w() as i64) + self.x()
-    }
-
-    ///
-    /// Restores position from flattened
-    ///
-    pub fn from_flat(xy: i64, size: &Size) -> Self {
-        let width = size.w() as i64;
-        assert!(width > 0, "Width needs to be greater then 0");
-        let x = xy.rem_euclid(width);
-        let y = xy.div_euclid(width);
-        Position::new(x, y)
-    }
-
-    ///
-    /// Adds vector to position
-    ///
-    /// # Example
-    /// ```
-    /// # use chen_core_lib::builtins::{Position, Vector};
-    /// let mut pos = Position::new(2, 3);
-    /// let vec = Vector::new(2, 3);
-    /// pos.add(vec);
-    /// assert_eq!(pos, Position::new(4, 6))
-    ///
-    /// ```
-    ///
-    pub fn add(&mut self, vec: Vector) {
-        self.0[0] += vec.i();
-        self.0[1] += vec.j();
-    }
-
-    ///
-    /// Returns distantion between two points and rounds up.
-    ///
-    /// # Example
-    /// ```
-    /// # use chen_core_lib::builtins::Position;
-    ///
-    /// let pos1 = Position::new(2, 1);
-    /// let pos2 = Position::new(5, 2);
-    ///
-    /// assert_eq!(pos1.dist(&pos2), 3);
-    /// ```
-    pub fn dist(&self, other: &Position) -> u64 {
-        ((self.x() - other.x()).pow(2) + (self.y() - other.y()).pow(2)).isqrt() as u64
     }
 
     ///
@@ -134,12 +78,16 @@ impl Position {
     ///
     /// assert_eq!(pos1.pdist(&pos2), 10);
     /// ```
-    pub fn pdist(&self, other: &Position) -> i64 {
+    pub fn pdist(&self, other: &Self) -> T {
         (self.x() - other.x()).pow(2) + (self.y() - other.y()).pow(2)
+    }
+
+    pub fn flat<S: PrimInt + Unsigned>(&self, size: &super::extend::Size<S>) -> T {
+        Self::flattened(size, self.x(), self.y())
     }
 }
 
-impl std::fmt::Display for Position {
+impl<T: PrimInt + Signed + Debug> std::fmt::Display for Position<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Position")
             .field("X", &self.x())
@@ -148,8 +96,14 @@ impl std::fmt::Display for Position {
     }
 }
 
-impl std::cmp::PartialEq for Position {
+impl<T: PrimInt + Signed> std::cmp::PartialEq for Position<T> {
     fn eq(&self, other: &Self) -> bool {
         self.x() == other.x() && self.y() == other.y()
+    }
+}
+
+impl<T: PrimInt + Signed> Position<T> {
+    pub fn from<O: PrimInt + Signed + Into<T>>(value: Position<O>) -> Self {
+        Self::new(value.x().into(), value.y().into())
     }
 }

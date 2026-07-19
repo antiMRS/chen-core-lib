@@ -55,7 +55,7 @@ impl<T: Default + Copy> Buffer<T> {
         let h = size.h() as i64;
 
         for i in 0..other.buf.len() {
-            let local_pos = Position::from_flat(i as i64, other_size);
+            let local_pos = Position::from_flat(other_size, i as i64);
             let target_x = local_pos.x() + x as i64;
             let target_y = local_pos.y() + y as i64;
             if target_x < 0 || target_y < 0 || target_x >= w || target_y >= h {
