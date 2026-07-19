@@ -1,6 +1,6 @@
 [package]
 name = "chen_core_lib"
-version = "0.3.0"
+version = "0.3.1"
 edition = "2024"
 description = "Assets for terminal like games."
 repository = "https://github.com/antiMRS/chen-core-lib/"
