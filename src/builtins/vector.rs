@@ -46,11 +46,7 @@ impl<T: PrimInt + Signed> Vector<T> {
     ///
     /// Creates new vector between two point
     ///
-    pub fn between(
-        &self,
-        from: super::extend::Position<T>,
-        to: super::extend::Position<T>,
-    ) -> Self {
+    pub fn between(from: super::extend::Position<T>, to: super::extend::Position<T>) -> Self {
         Self::new(to.x() - from.x(), to.y() - from.y())
     }
 }

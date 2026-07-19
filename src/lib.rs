@@ -60,6 +60,20 @@ mod test {
     }
 
     #[test]
+    fn vector_math_test() {
+        let a = Vector::new(5, 6);
+        let b = Vector::new(8, 2);
+
+        assert_eq!(Vector::between(pos!(-1, 2), pos!(5, 5)), Vector::new(6, 3));
+
+        assert_eq!(a.dot_product(b), 52);
+        assert_eq!(a + b, Vector::new(13, 8));
+        assert_eq!(-a, Vector::new(-5, -6));
+        assert_eq!(a - b, Vector::new(-3, 4));
+        assert_eq!(a.plenght(), 61);
+    }
+
+    #[test]
     fn simple_geometry_test() {
         let sq_geom = Geometry::new_square(5);
         let sq_geom_pos = Position::new(5, 7);
