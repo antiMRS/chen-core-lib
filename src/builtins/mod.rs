@@ -63,6 +63,14 @@ pub(super) use buffer::Buffer;
 
 pub const EMPTY_CHAR: char = ' ';
 
+///
+/// Basic types with generic parameters.
+///
+/// # WHY IS THIS NECESSARY.
+///
+/// For projects that need larger/smaller types,
+/// or that are not satisfied with the standard types.
+///
 pub mod extend {
     pub use super::position::Position;
     pub use super::size::Size;
@@ -76,6 +84,21 @@ pub use self::{
     udim::UDim,
 };
 
+///
+/// The main type for displaying the position.
+///
+/// See [extend::Position]
+///
 pub type Position = extend::Position<i64>;
+///
+/// The main type for displaying size of object.
+///
+/// See [extend::Size]
+///
 pub type Size = extend::Size<u64>;
+///
+/// The main type for displaying the vector.
+///
+/// See [extend::Vector]
+///
 pub type Vector = extend::Vector<i64>;

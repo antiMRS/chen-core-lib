@@ -43,6 +43,9 @@ impl<T: PrimInt + Signed> Vector<T> {
         self.i() * other.i() + self.j() * other.j()
     }
 
+    ///
+    /// Creates new vector between two point
+    ///
     pub fn between(
         &self,
         from: super::extend::Position<T>,
