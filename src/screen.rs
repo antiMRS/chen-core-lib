@@ -138,8 +138,9 @@ impl Terminal {
                             let _ = write!(stdout, "\x1b[{}m", color.as_legacy());
                         }
                     }
-                    let _ = writeln!(stdout, "{}", ch);
+                    let _ = write!(stdout, "{}", ch);
                 }
+                let _ = writeln!(stdout);
             }
         }
 
