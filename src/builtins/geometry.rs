@@ -397,7 +397,7 @@ impl Geometry {
                 break;
             }
 
-            let mut prev = subject[n - 1].clone();
+            let mut prev = subject[n - 1];
             let mut prev_inside = Self::is_left(p1, p2, &prev) >= 0;
 
             for current in subject.iter().take(n) {
@@ -412,7 +412,7 @@ impl Geometry {
                             output.push(intersect);
                         }
                     }
-                    output.push(current.clone());
+                    output.push(*current);
                 } else {
                     if prev_inside
                         && let Some(intersect) =
@@ -422,7 +422,7 @@ impl Geometry {
                     }
                 }
 
-                prev = current.clone();
+                prev = *current;
                 prev_inside = current_inside;
             }
 
