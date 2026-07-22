@@ -5,7 +5,7 @@ use num_traits::Signed;
 use num_traits::Unsigned;
 use num_traits::{Euclid, NumCast, PrimInt};
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct Position<T: Signed + PrimInt>(Dims<T, 2>);
 
 impl<N: Signed + PrimInt> Position<N> {
@@ -84,6 +84,16 @@ impl<T: Signed + PrimInt> Position<T> {
 
     pub fn flat<S: PrimInt + Unsigned>(&self, size: &super::extend::Size<S>) -> T {
         Self::flattened(size, self.x(), self.y())
+    }
+
+    pub fn add(&mut self, xy: (T, T)) {
+        self.0[0] = self.0[0] + xy.0;
+        self.0[1] = self.0[0] + xy.1;
+    }
+
+    pub fn add_vector(&mut self, vec: super::extend::Vector<T>) {
+        self.0[0] = self.0[0] + vec.i();
+        self.0[1] = self.0[0] + vec.j();
     }
 }
 

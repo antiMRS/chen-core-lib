@@ -1,6 +1,6 @@
 [package]
 name = "chen_core_lib"
-version = "0.3.1"
+version = "0.3.2"
 edition = "2024"
 description = "Assets for terminal like games."
 repository = "https://github.com/antiMRS/chen-core-lib/"
@@ -28,3 +28,5 @@ terminal_color_cubes = []
 terminal_color_rgb = []
 terminal_color_legacy = []
 use_gui = ["colored", "dep:minifb", "dep:chen_core_fonts"]
+bit32 = []
+bit64 = []
