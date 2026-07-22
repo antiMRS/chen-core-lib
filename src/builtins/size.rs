@@ -5,7 +5,7 @@ use super::Dims;
 ///
 /// Shows the size of the object
 ///
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Copy, Default)]
 pub struct Size<T: PrimInt + Unsigned>(Dims<T, 2>);
 
 impl<T: PrimInt + Unsigned> Size<T> {
